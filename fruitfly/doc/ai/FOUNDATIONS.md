@@ -12,7 +12,18 @@ Task-level detail lives in `plans/`; architecture decisions live in `../adr/`.
 
 ## Goals
 
-- **Nominal goal:** simulate a single fruit fly to understand its behavior.
+- **The goal: understand a fruit fly.** Everything else serves this. The way we get
+  there is by building **a simulated tiny brain** — a single fruit fly's — from spiking
+  neurons up, so that understanding the brain *is* understanding the fly. The thing we are
+  making is a *brain*, not a program that produces fly-like output.
+- **Not a binary computer (the anti-goal):** the whole reason for this project is that a
+  brain is **not** a digital computer, and we refuse to build one. Spikes are
+  all-or-nothing, but the *computation is not* — information lives in continuous,
+  analog quantities: firing **rates**, spike **timing**, coincidence **windows**, and
+  **population** activity. We never model a circuit as logic gates, Boolean truth tables,
+  or `if`-style decisions; behavior must **emerge** from graded, temporal neural dynamics.
+  If an explanation or design reduces a circuit to digital logic, that is a red flag to
+  stop and reframe.
 - **Fidelity principle:** the simulation should be **as true to biological reality as our
   current knowledge allows**. When a choice trades faithfulness for convenience, prefer
   faithfulness — and where we simplify, do it deliberately, understanding what we left out
@@ -21,9 +32,11 @@ Task-level detail lives in `plans/`; architecture decisions live in `../adr/`.
   we pick the simplest one that is biologically honest and that we can fully explain, then
   climb when a behavior actually demands it. "Make it visible/convenient" is never, on its
   own, a reason to make it less true.
-- **Real goal (more important):** the user *truly understands the code* — how neurons
-  work and how they are represented in code. This is a **learning project**, explicitly
-  not vibe-coding a deliverable. A finished-but-not-understood program is a failure.
+- **How we get there — a learning project:** the path to understanding the fly runs
+  through the *user* truly understanding the code — how neurons work and how they are
+  represented. Understanding is the deliverable; a finished-but-not-understood program is
+  a failure, not a success. So we go slow, build in tiny pieces, and never trade the
+  user's understanding for progress.
 
 ## Working style (coding & collaboration)
 

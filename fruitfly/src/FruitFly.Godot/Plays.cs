@@ -13,8 +13,7 @@ public static class Plays
     public static readonly Play[] All =
     {
         new("1 — Single neuron", "res://NeuronView.tscn"),
-        // 2 — Two-neuron chain   (A drives B)            — next
-        // 3 — Decaying synapse   (watch B charge up)
-        // 4 — Coincidence cluster (2 inputs → 1 output, AND emerges)
+        new("2 — Two-neuron chain", "res://ChainView.tscn"),  // A → decaying synapse → B (watch B charge up)
+        // 3 — Coincidence cluster (2 inputs → 1 output, AND emerges)   — next
     };
 }

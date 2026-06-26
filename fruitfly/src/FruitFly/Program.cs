@@ -24,7 +24,7 @@ internal static class Program
         for (int step = 0; step < steps; step++)
         {
             bool aFired = a.Step(drive, dt);        // 1. run A on its external drive
-            double toB = synapse.Current(aFired);   // 2. convert A's spike event → current for B
+            double toB = synapse.Step(aFired, dt);  // 2. advance the synapse → current for B (now decays over steps)
             bool bFired = b.Step(toB, dt);          // 3. run B on whatever the synapse delivered
 
             Console.WriteLine(

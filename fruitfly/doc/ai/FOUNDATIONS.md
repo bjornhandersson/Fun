@@ -13,6 +13,14 @@ Task-level detail lives in `plans/`; architecture decisions live in `../adr/`.
 ## Goals
 
 - **Nominal goal:** simulate a single fruit fly to understand its behavior.
+- **Fidelity principle:** the simulation should be **as true to biological reality as our
+  current knowledge allows**. When a choice trades faithfulness for convenience, prefer
+  faithfulness — and where we simplify, do it deliberately, understanding what we left out
+  and why. Fidelity is a *ladder* (e.g. synapse models climb from an instantaneous kick →
+  single-exponential decay → conductance-based): we don't leap to the most complex rung,
+  we pick the simplest one that is biologically honest and that we can fully explain, then
+  climb when a behavior actually demands it. "Make it visible/convenient" is never, on its
+  own, a reason to make it less true.
 - **Real goal (more important):** the user *truly understands the code* — how neurons
   work and how they are represented in code. This is a **learning project**, explicitly
   not vibe-coding a deliverable. A finished-but-not-understood program is a failure.

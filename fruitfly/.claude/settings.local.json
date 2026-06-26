@@ -8,7 +8,11 @@
       "Bash(mdfind -name \"Godot\")",
       "Read(//Users/bjornandersson/Applications/**)",
       "Read(//Users/bjornandersson/**)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Bash(sed -i '' 's/System\\\\.Array/Array/g' src/FruitFly.Core/SpikingNet.cs)",
+      "Read(//private/tmp/brainprobe/**)",
+      "Bash(sed -i '' 's/net8.0/net10.0/' brainprobe.csproj)",
+      "Bash(timeout 180 dotnet build FruitFly.Godot.sln -v quiet)"
     ]
   }
 }

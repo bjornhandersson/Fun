@@ -14,6 +14,10 @@ public static class Plays
     {
         new("1 — Single neuron", "res://NeuronView.tscn"),
         new("2 — Two-neuron chain", "res://ChainView.tscn"),  // A → decaying synapse → B (watch B charge up)
-        // 3 — Coincidence cluster (2 inputs → 1 output, AND emerges)   — next
+        new("3 — Summation", "res://SummationView.tscn"),     // two inputs pool onto one output; rate tracks combined drive
+        new("4 — Inhibition", "res://InhibitionView.tscn"),   // Input 2 negative: push vs pull, the brake
+        new("5 — Loop", "res://LoopView.tscn"),               // A ⇄ B mutual excitation via Network; self-sustaining = memory
+        new("6 — Fruit fly + banana", "res://NamedNeuronFlyView.tscn"),  // Braitenberg vehicle: crossed smell→motor, seeking emerges
+        new("7 — Two flies + walls", "res://TwoFliesView.tscn"),         // ~300k neurons each: wall-avoidance EMERGES from neurons, no bounce cheat
     };
 }

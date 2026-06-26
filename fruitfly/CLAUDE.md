@@ -26,6 +26,12 @@ prime directive. Follow these rules in every interaction:
 
 - **Bottom-up, emergent.** Substrate = spiking neurons + synapses. Behavior emerges from
   wiring. "Assembly for an 8-bit chip, but for a fruit fly."
+- **Tiny brain vs. bigger brain.** The fly's *cognition* (sense → decide → steer) lives in
+  neurons only; an algorithm that decides what the fly *should do* is the designer's "bigger
+  understanding" smuggled in — clean it off, push it into neurons. The *bigger brain* (us)
+  may still wire, observe, and provide the world/body (sense organs + muscles as
+  transducers). Test each line: tiny brain thinking, or bigger brain providing/observing?
+  See FOUNDATIONS "Goals". 
 - **Neuron model:** Leaky Integrate-and-Fire (LIF).
 - **First circuit:** Braitenberg vehicle (cross-wired sensors → motors → seeking emerges).
 - **Engine:** data-oriented (struct-of-arrays, CSR sparse synapses, event-driven spikes).

@@ -24,6 +24,19 @@ Task-level detail lives in `plans/`; architecture decisions live in `../adr/`.
   or `if`-style decisions; behavior must **emerge** from graded, temporal neural dynamics.
   If an explanation or design reduces a circuit to digital logic, that is a red flag to
   stop and reframe.
+- **Tiny brain vs. bigger brain (where computation is allowed to live):** there are two
+  brains here. The **tiny brain** is the fly — the thing we simulate — and its *cognition*
+  (turning sensation into a decision, choosing, steering) must live in **neurons**. The
+  moment a hand-written algorithm decides what the fly *should do*, the designer's "bigger
+  understanding" has been smuggled in to do the tiny brain's job; that gets **cleaned off**
+  and pushed back into neurons. The **bigger brain** is us — the simulation around the fly —
+  and it *obviously* understands the tiny brain; that is fine and necessary. The bigger
+  brain may legitimately (a) **build and wire** the brain, (b) **observe and visualize** it,
+  and (c) **provide its world and body** — the environment, and the sense organs and muscles
+  as *transducers* (smell → input current, motor spikes → wheel speed). That scaffolding may
+  be algorithmic because it is the bigger brain's job, not the tiny brain's. The test for any
+  line: *is this the tiny brain thinking, or the bigger brain providing/observing?* If it is
+  the tiny brain thinking and it is written as an algorithm, it does not belong.
 - **Fidelity principle:** the simulation should be **as true to biological reality as our
   current knowledge allows**. When a choice trades faithfulness for convenience, prefer
   faithfulness — and where we simplify, do it deliberately, understanding what we left out

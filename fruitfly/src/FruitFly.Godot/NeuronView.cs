@@ -38,6 +38,25 @@ public partial class NeuronView : Node2D
 	// Did the neuron fire on the most recent step? Drives the spike flash in _Draw.
 	private bool _fired;
 
+	// Godot calls _Ready once when the scene loads. We add a title + hint label so the
+	// Play identifies itself and tells you how to get back to the gallery.
+	public override void _Ready()
+	{
+		AddChild(new Label
+		{
+			Text = "Play 1 — Single neuron     (Esc = menu)",
+			Position = new Vector2(20, 20),
+		});
+	}
+
+	// Esc returns to the gallery. Every Play shares this convention so you can always
+	// step back out to pick another one.
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (@event is InputEventKey { Pressed: true, Keycode: Key.Escape })
+			GetTree().ChangeSceneToFile("res://PlayMenu.tscn");
+	}
+
 	// Godot calls _Process once per frame. We use it to advance the simulation, then
 	// ask for a repaint. We ignore `delta` (real seconds) for now and step a fixed Dt.
 	public override void _Process(double delta)

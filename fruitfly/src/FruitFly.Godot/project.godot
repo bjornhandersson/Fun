@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="FruitFly"
-run/main_scene="uid://brok6fug6b20h"
+run/main_scene="res://PlayMenu.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 
 [dotnet]

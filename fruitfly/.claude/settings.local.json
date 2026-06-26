@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(dotnet --version)",
-      "Bash(dotnet run *)"
+      "Bash(dotnet run *)",
+      "Bash(dotnet build *)",
+      "Bash(brew list *)",
+      "Bash(mdfind -name \"Godot\")",
+      "Read(//Users/bjornandersson/Applications/**)",
+      "Read(//Users/bjornandersson/**)",
+      "Bash(git check-ignore *)"
     ]
   }
 }

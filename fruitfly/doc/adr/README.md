@@ -25,9 +25,9 @@ new ADR that supersedes it.
 | [0001](0001-use-csharp.md) | Accepted | Use C# |
 | [0002](0002-bottom-up-spiking-neurons.md) | Accepted | Bottom-up spiking neurons (emergent), not a top-down state machine |
 | [0003](0003-leaky-integrate-and-fire.md) | Accepted | Use the Leaky Integrate-and-Fire (LIF) neuron model |
+| [0004](0004-godot-for-visualization.md) | Accepted | Use Godot (C#) for visualization, brought forward now; brain stays in a Godot-free `FruitFly.Core` library |
 
 ### Backlog (decisions made, ADR not yet written)
 
 - Full struct-of-arrays (SoA) engine (CSR sparse synapses, event-driven spikes) — the real
   high-performance data layout, to be written when we build the engine at scale.
-- Godot (C#) for the visualization layer — to be confirmed/written when we start the viz.

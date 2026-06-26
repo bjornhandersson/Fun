@@ -1,0 +1,12 @@
+# Godot 4 engine cache / import data — regenerated on open, never committed.
+.godot/
+
+# .NET build output (all projects: Core, console, Godot).
+bin/
+obj/
+
+# Godot C# build temp lives under .godot/ already, but be explicit about mono temp.
+.mono/
+
+# macOS cruft
+.DS_Store

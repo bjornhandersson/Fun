@@ -36,8 +36,10 @@ These rules govern every interaction in this repo:
 Built **bottom-up**: the substrate is spiking neurons + synapses, and behavior is meant
 to **emerge from wiring** rather than be scripted ("assembly for an 8-bit chip, but for a
 fruit fly"). Neuron model is **Leaky Integrate-and-Fire (LIF)**; the first circuit will be
-a **Braitenberg vehicle**. Language is **C#**; a Godot (C#) live dual-view (world + brain)
-comes later. The engine is data-oriented so it can scale to the real connectome
+a **Braitenberg vehicle**. Language is **C#**; visualization is **Godot (C#)**, brought
+forward now (ADR 0004) with the brain kept in a Godot-free `FruitFly.Core` library that
+Godot references — the eventual goal being a live dual-view (world + brain). The engine is
+data-oriented so it can scale to the real connectome
 (~140k neurons), though small hand-wired circuits come first.
 
 Rationale for each of these choices is recorded as an ADR (see index below).
@@ -63,3 +65,4 @@ Architecture Decision Records live in `../adr/`. See [`../adr/README.md`](../adr
 | [0001](../adr/0001-use-csharp.md) | Use C# |
 | [0002](../adr/0002-bottom-up-spiking-neurons.md) | Bottom-up spiking neurons (emergent), not a top-down state machine |
 | [0003](../adr/0003-leaky-integrate-and-fire.md) | Use the Leaky Integrate-and-Fire neuron model |
+| [0004](../adr/0004-godot-for-visualization.md) | Use Godot (C#) for visualization, brought forward now; brain stays in `FruitFly.Core` |

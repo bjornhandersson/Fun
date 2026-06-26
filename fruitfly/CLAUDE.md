@@ -29,15 +29,18 @@ prime directive. Follow these rules in every interaction:
 - **Neuron model:** Leaky Integrate-and-Fire (LIF).
 - **First circuit:** Braitenberg vehicle (cross-wired sensors → motors → seeking emerges).
 - **Engine:** data-oriented (struct-of-arrays, CSR sparse synapses, event-driven spikes).
-- **Visualization:** Godot (C#) later — live dual-view (world + brain). Math first.
+- **Visualization:** Godot (.NET/C#) — brought forward now (see ADR 0004). The brain lives
+  in a Godot-free `FruitFly.Core` library; Godot and the console app are *viewers* that
+  reference it. Eventual goal: live dual-view (world + brain).
 
 ## Current status
 
-Stack decided; AI harness established. **Milestone 0 underway — the single LIF neuron is
-built and runs.** `LifNeuron` (state + parameters + an Euler `Step`) and a `Program`
-driver that prints an ASCII voltage trace are done and verified: under constant input the
-neuron charges → fires → resets → repeats (a periodic spike train). **Next:** add a
-`Synapse` (a source spike adds weight to the target's input), then wire a 3-neuron chain.
+Stack decided; AI harness established. **Milestone 0 underway — LIF neuron and synapse
+built, now wiring chains.** `LifNeuron` (state + parameters + an Euler `Step`) and
+`Synapse` (turns a source spike event into target input current) are done and verified.
+The `Program` driver wires a **2-neuron chain** (A driven by constant input → B through one
+synapse) and renders dual ASCII voltage panels: A fires periodically and each A-spike
+drives B over threshold. **Next:** extend to a 3-neuron chain (input → middle → output).
 See the active plan: [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
 
 ## AI structure

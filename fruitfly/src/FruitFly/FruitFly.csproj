@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- The console app is just one viewer of the brain. It references the Core library
+       rather than owning the neuron code, so the math has a single home. -->
+  <ItemGroup>
+    <ProjectReference Include="..\FruitFly.Core\FruitFly.Core.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://brok6fug6b20h"]
+
+[ext_resource type="Script" uid="uid://edi7l3raamid" path="res://NeuronView.cs" id="1_v50sb"]
+
+[node name="Node2D" type="Node2D" unique_id=1233155859]
+script = ExtResource("1_v50sb")

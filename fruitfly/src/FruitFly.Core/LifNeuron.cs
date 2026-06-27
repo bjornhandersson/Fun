@@ -6,6 +6,12 @@ public class LifNeuron
     // State — the only thing that changes while the sim runs.
     public double V { get; private set; } // membrane voltage (mV); the neuron's whole "mind" at any instant
 
+    // The adaptation "brake": a slow current that BUILDS UP each time the neuron fires and
+    // fades when it's quiet. It subtracts from the membrane drive, pulling V away from
+    // threshold — so the more this neuron has fired lately, the harder it is to fire again.
+    // Born at 0 (rested). This fatigue is what lets a self-sustaining latch finally let go.
+    public double Adaptation { get; private set; }
+
     // Parameters — fixed personality, set once at construction (init-only). Same equation for all neurons.
     public double VRest { get; init; } = -65; // resting level (mV); V drifts back here when there's no input
     public double VThreshold { get; init; } = -50; // fires when V crosses this (mV); ~15 mV above rest, so inputs must add up
@@ -20,6 +26,16 @@ public class LifNeuron
     // left/right tie so the fly never sits balanced, driving straight into a wall.
     public double NoiseSigma { get; init; } = 0;
 
+    // Spike-frequency adaptation — a real neuron's fatigue. Each spike opens slow potassium
+    // channels that hyperpolarise the cell; we model that as the Adaptation current above.
+    // AdaptKick = how much drag ONE spike adds.  TauAdapt = how slowly that drag fades.
+    // AdaptKick = 0 (default) switches adaptation OFF entirely, so every circuit built before
+    // this behaves EXACTLY as it did (same opt-in pattern as NoiseSigma). TauAdapt stays > 0
+    // so the leak never divides by zero even when unused, and wants to be MUCH larger than Tau
+    // — the brake is the SLOW process that must outlast fast firing to produce a real hold.
+    public double AdaptKick { get; init; } = 0; // mV of drag added per spike
+    public double TauAdapt { get; init; } = 100; // ms; how slowly the brake fades back to zero
+
     public LifNeuron()
     {
         V = VRest; // a neuron is born at rest
@@ -29,9 +45,14 @@ public class LifNeuron
     // Returns true if the neuron fired (spiked) this step.
     public bool Step(double I, double dt)
     {
-        // Euler step: nudge V a fraction (dt/Tau) of the way toward where the
-        // leak (-(V - VRest)) and the input (R * I) are pushing it.
-        V += (dt / Tau) * (-(V - VRest) + R * I);
+        // The brake fades a fraction (dt/TauAdapt) of the way toward zero each step — slowly,
+        // because TauAdapt is large. With AdaptKick = 0 it is always 0 and this does nothing.
+        Adaptation += (dt / TauAdapt) * (-Adaptation);
+
+        // Euler step: nudge V a fraction (dt/Tau) of the way toward where the leak
+        // (-(V - VRest)), the input (R * I), and the adaptation brake (-Adaptation) push it.
+        // The brake is the new term — it pulls V DOWN, away from threshold, as fatigue grows.
+        V += (dt / Tau) * (-(V - VRest) + R * I - Adaptation);
 
         // Stochastic part: a random push, up or down. It scales with √dt (NOT dt) because
         // independent kicks accumulate like a random walk — halve the step and you take twice
@@ -45,6 +66,7 @@ public class LifNeuron
         if (V >= VThreshold) // crossed the firing line?
         {
             V = VReset; // spike: drop straight to the reset level
+            Adaptation += AdaptKick; // load a fresh dose of fatigue — this is what builds up
             return true;
         }
 

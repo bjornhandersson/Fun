@@ -45,6 +45,19 @@ Task-level detail lives in `plans/`; architecture decisions live in `../adr/`.
   we pick the simplest one that is biologically honest and that we can fully explain, then
   climb when a behavior actually demands it. "Make it visible/convenient" is never, on its
   own, a reason to make it less true.
+  - **It is a TRUE simulation, never pretend behavior.** No parameter is ever justified by
+    "what we want the fly to do" — only by "how things actually work." A value's test is
+    *"does this correspond to something real making it happen?"*, never *"does this produce
+    the behavior I want?"* So we **never** script or fake an outcome: no tonic current
+    injected just to manufacture motion (a "cruise" drive with no real cause), no
+    `if (stuck) turn`, no nudging an output to look alive. A neuron resting silent with no
+    input is the substrate behaving *truthfully*, not a gap to paper over — every spike must
+    have a real cause (real stimulus → real spikes → real synapses → real motors).
+  - **Push back, even against the user (explicit user instruction).** If a request — *even
+    the user's own* — would make the fly behave through anything other than a true neural
+    simulation, do **not** build the fake. Implement the truthful version and **tell the user
+    plainly that they're wrong.** Fidelity overrides the request; the user has explicitly
+    asked to be corrected here, so correcting them is the job, not defiance of it.
 - **How we get there — a learning project:** the path to understanding the fly runs
   through the *user* truly understanding the code — how neurons work and how they are
   represented. Understanding is the deliverable; a finished-but-not-understood program is
@@ -85,10 +98,12 @@ Task-level plans live in `plans/`. One plan per task/milestone.
 | Plan | Status | Summary |
 |------|--------|---------|
 | [0001 — Milestone 0: LIF neuron](plans/0001-milestone-0-lif-neuron.md) | In progress | Single LIF neuron + synapse + 3-neuron chain; voltage trace. Get the math right before any engine. |
+| [0002 — Persistent internal state (memory)](plans/0002-persistent-state-memory.md) | Planned | First slice of "brain": a self-sustaining interneuron that gives the fly memory of being stuck, so it breaks free on its own. Reflex → history-dependent behavior. |
 
-_Future milestones (Braitenberg seeking, decision circuit, ring-attractor compass,
-internal-state/zombie behavior, connectome subgraphs) will each get their own plan when
-we reach them._
+_Several circuits (Braitenberg seeking, summation, inhibition, self-sustaining loop, the
+~300k-neuron flies) were built **without** their own plans — a documentation gap to backfill.
+Remaining future milestones (decision circuit, ring-attractor compass, spontaneous search,
+connectome subgraphs) will each get a plan when we reach them._
 
 ## Decision index (ADRs)
 

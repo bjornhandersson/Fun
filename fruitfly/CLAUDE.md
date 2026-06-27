@@ -8,6 +8,26 @@ behind every decision, read **[`doc/ai/FOUNDATIONS.md`](doc/ai/FOUNDATIONS.md)**
 A simulation of a single fruit fly, built **bottom-up from spiking neurons** so that
 behavior *emerges* from neural wiring rather than being scripted. Built in **C#**.
 
+## Non-negotiable: this is a TRUE simulation, not pretend behavior
+
+Every behavior must be **real** — caused through the neurons, not faked to *look* right.
+No parameter is ever about "what we want the fly to do"; it is always about **how things
+actually work**. The test for any value or line is *"does this correspond to something real
+making it happen?"* — never *"does this produce the behavior I want?"*
+
+- **Never script or fake behavior.** No tonic injected just to manufacture motion (e.g. a
+  "cruise" current with no real cause), no `if (stuck) turn`, no nudging outputs to look
+  alive. A neuron at rest staying silent is the substrate behaving *truthfully*, not a
+  problem to paper over. Movement must EMERGE from genuine causes (real stimulus → real
+  spikes → real synapses → real motors).
+- **Push back, even against the user — this is an explicit instruction from the user.** If a
+  request (even the user's own) would make the fly act through anything other than a true
+  neural simulation, **do not build the fake.** Implement the truthful version *and tell the
+  user, plainly, that they're wrong.* Fidelity overrides the request. The user has asked to
+  be corrected here; correcting them is doing the job, not defying it.
+
+See FOUNDATIONS "Goals → Fidelity principle" and "Tiny brain vs. bigger brain".
+
 ## The most important thing: this is a LEARNING project
 
 The real goal is that the **user truly understands the code** (how neurons work and how

@@ -1,7 +1,21 @@
 using FruitFly; // LifNeuron + Synapse + Network from FruitFly.Core
 using Godot;
 
-// Play 6 — Fruit fly + banana (a Braitenberg vehicle).
+// Play 6b — Fruit fly + banana + a first piece of MEMORY (compare against Play 6).
+//
+// This starts as an exact copy of Play 6 (the resting Braitenberg fly). On top of that body we
+// are growing ONE extra interneuron whose job is to *remember*. A LifNeuron that excites
+// ITSELF (a self-synapse) can keep firing after its input stops: its own spikes loop back and
+// re-trigger it. That persistent firing IS the memory — a leaky, graded ATTRACTOR, not a
+// digital latch. The eventual goal: a fly pinned head-on against a wall remembers it is stuck
+// and keeps turning to escape even after the wall stops pushing.
+//
+// Built one tiny piece at a time. The memory neuron is charged by the WALL SENSORS: grind the
+// fly head-on into a wall and its memory bar latches (it "remembers it's stuck"). That latched
+// memory now drives ONE wheel — a COMMITTED turn that persists past the wall pressure and breaks
+// the head-on deadlock, then releases on its own via fatigue once clear. SPACE pokes it manually.
+//
+// The original Play-6 description still applies to the body:
 //
 // The fly has two smell sensors (antennae) and two motor neurons (wheels). Smell from the
 // banana drives the sensors; the sensors are CROSS-wired to the motors:
@@ -23,7 +37,7 @@ using Godot;
 // wheel → the fly yaws right, away from it. Seeking (crossed) and avoiding (uncrossed) feed
 // the SAME two motors, so the behaviors just SUM — no arbitration code. The only non-neural
 // thing left is a hard clamp so the fly physically can't leave the screen.
-public partial class BraitenbergFlyView : Node2D
+public partial class BraitenbergFlyMemoryView : Node2D
 {
     // ---- Brain (FruitFly.Core) ----------------------------------------------------
     // Every membrane carries a little noise (mV per √ms). Real neurons jitter — ion channels
@@ -44,7 +58,26 @@ public partial class BraitenbergFlyView : Node2D
     private readonly LifNeuron _wallL = new() { NoiseSigma = MembraneNoise };
     private readonly LifNeuron _wallR = new() { NoiseSigma = MembraneNoise };
 
-    public BraitenbergFlyView()
+    // The NOCICEPTOR — a HARM sensor, and deliberately not called a "pain" sensor: flies clearly
+    // have nociception (detecting damage and escaping it), but whether they consciously SUFFER is
+    // unknown, so we claim only what's real. Unlike the wall sensors, which fire on PROXIMITY
+    // ("a wall is near"), this fires only when the body actually RAMS a wall ("that hurt"). It is
+    // the clean "something is wrong" event we'll later learn from. Not wired to behavior yet.
+    private readonly LifNeuron _noci = new() { NoiseSigma = MembraneNoise };
+
+    // The MEMORY interneuron. An ordinary LifNeuron — no special "memory" machinery. What makes
+    // it remember is the self-synapse wired in the constructor: its spikes feed back into
+    // itself. We give it NO noise so its hold/decay is clean to read while we tune it (the
+    // recurrent loop, not jitter, should drive it). Everything else is the default LIF
+    // personality: born at VRest (-65), fires at -50, leaks with Tau = 10 ms.
+    private readonly LifNeuron _memory = new()
+    {
+        NoiseSigma = 0.0,
+        AdaptKick = MemAdaptKick, // fatigue — lets the latch RELEASE on its own once the fly is clear
+        TauAdapt = MemAdaptTau,
+    };
+
+    public BraitenbergFlyMemoryView()
     {
         _net.Add(_sensorL);
         _net.Add(_sensorR);
@@ -52,6 +85,8 @@ public partial class BraitenbergFlyView : Node2D
         _net.Add(_motorR);
         _net.Add(_wallL);
         _net.Add(_wallR);
+        _net.Add(_memory);
+        _net.Add(_noci);
 
         // CROSSED, excitatory: each smell sensor drives the OPPOSITE motor. weight 45 ≈ the
         // value that reliably turns sensor spikes into motor spikes. Crossing → SEEKING.
@@ -63,6 +98,31 @@ public partial class BraitenbergFlyView : Node2D
         // seeking, opposite crossing → AVOIDANCE. Both drives sum at the shared motors.
         _net.Connect(_wallL, _motorL, 45.0);
         _net.Connect(_wallR, _motorR, 45.0);
+
+        // THE memory: wire the neuron to ITSELF. Source and target are the same neuron, so every
+        // spike it fires loads its OWN synapse, which (after the network's built-in one-tick
+        // delay) pushes it back up toward threshold. If MemorySelfWeight is strong enough, that
+        // feedback re-fires it before the leak pulls it back to rest → self-sustaining activity =
+        // the held state. Too strong and it never stops (saturates); too weak and it fades at
+        // once. The bistable sweet spot in between is what we'll tune by poking it.
+        _net.Connect(_memory, _memory, MemorySelfWeight);
+
+        // WALL → MEMORY: both wall sensors also charge the memory neuron. While the fly is jammed
+        // against a wall the wall sensors fire continuously, and that sustained drive INTEGRATES
+        // on the memory neuron until it tips into its self-sustaining latch. A brief brush isn't
+        // enough — only being stuck for a moment is — which is exactly "remember that I'm stuck".
+        // Head-on (both sensors firing) charges it fastest, i.e. the most-stuck case latches soonest.
+        _net.Connect(_wallL, _memory, WallToMemoryWeight);
+        _net.Connect(_wallR, _memory, WallToMemoryWeight);
+
+        // MEMORY → MOTOR (asymmetric, INHIBITORY): a LATCHED memory pulls ONE wheel DOWN. Why
+        // inhibit rather than excite? A head-on jam SATURATES both motors (wall drive pins both
+        // wheels at full), so pushing a wheel harder changes nothing — the difference stays zero
+        // and the fly drives straight into the wall. Pulling the RIGHT wheel down instead drops it
+        // out of saturation, so wheelL > wheelR → the fly yaws right and peels off. Because the
+        // memory holds itself, that turn persists past the wall pressure, then releases on fatigue.
+        // Negative weight = inhibition. The escape direction is a wiring choice, not a script.
+        _net.Connect(_memory, _motorR, -MemoryToMotorWeight);
     }
 
     // ---- Body (world units = pixels) ----------------------------------------------
@@ -81,6 +141,11 @@ public partial class BraitenbergFlyView : Node2D
     private double _wallL01,
         _wallR01; // latest wall-proximity readings at each antenna (0 = far, 1 = touching)
 
+    private double _actMem; // leaky integral of the memory neuron's spikes — for the panel bar
+    private double _actNoci; // leaky integral of the nociceptor's spikes — for its panel bar
+    private double _pokeMsLeft; // ms of manual "poke" input still owed to the memory neuron (SPACE)
+    private bool _colliding; // did the body actually ram a wall last frame? this is what drives the nociceptor
+
     // ---- Tunables -----------------------------------------------------------------
     private const float AntennaSpread = 0.7f; // radians each antenna sits off-center (wider = bigger L/R contrast)
     private const float AntennaDist = 38f; // how far antennae reach ahead of the body
@@ -91,8 +156,9 @@ public partial class BraitenbergFlyView : Node2D
     private const double SensorGain = 40.0; // smell concentration → sensor input current. Tuned so a FAR banana sits right at the firing line (a hesitant creep) and a NEAR banana drives hard — speed now RISES as the fly closes in, instead of being pinned at max everywhere
     private const double MotorTonic = 0.0; // no baked-in cruise: the fly starts at REST, and motion must EMERGE from what it senses (smell drives the motors via the cross-wiring; membrane noise gives an occasional resting twitch)
 
-    private const double WallGain = 55.0; // wall proximity → wall-sensor input current (strong, so avoidance overrides seeking up close)
+    private const double WallGain = 40.0; // wall proximity → wall-sensor input current. Lower = the fly's wall organs are LESS sensitive, so it's less "scared" — it lets walls get closer before reacting (and charges the memory a touch less eagerly too).
     private const double WallFalloff = 45.0; // px at which proximity halves — small, so walls are felt only when near
+    private const double NociGain = 60.0; // input the nociceptor gets WHILE the body is colliding — a sharp, strong "ouch", well above threshold (it's an event, not a graded nearness)
 
     private const double MotorTauMs = 60.0; // activation smoothing: turns spiky firing into smooth muscle
     private const double MotorKick = 1.0; // activation added per motor spike
@@ -101,6 +167,17 @@ public partial class BraitenbergFlyView : Node2D
     private const float CruiseSpeed = 130f; // px/sec at full combined activation
     private const float TurnSpeed = 3.2f; // rad/sec at full activation difference
     private const float EatRadius = 42f; // get this close and the banana is "eaten" (respawns)
+
+    // ---- Memory neuron (the new piece) --------------------------------------------
+    private const double MemorySelfWeight = 60.0; // self-excitation per spike — the LATCH. Carried over from Play 5b, where it gives a solid hold.
+    private const double MemAdaptKick = 0.6; // fatigue added per spike — the RELEASE. Small, so the brake builds slowly and the hold lasts.
+    private const double MemAdaptTau = 400.0; // ms; how long fatigue lingers (sets hold + recovery time). Tune up for a longer committed turn.
+    private const double WallToMemoryWeight = 25.0; // how hard each wall-sensor spike charges the memory. Tuned so SUSTAINED contact latches it, a brief brush does not.
+    private const double MemoryToMotorWeight = 60.0; // a latched memory INHIBITS one wheel → a committed turn. Must be INHIBITORY, not excitatory: a head-on jam SATURATES both motors, so pushing a wheel harder does nothing — only pulling the OTHER wheel DOWN creates the left/right difference that turns the fly. Magnitude must beat the wall+smell drive on that wheel.
+    private const double MemoryPokeCurrent = 30.0; // input current a SPACE-poke injects — comfortably above threshold so the neuron starts firing
+    private const double MemoryPokeMs = 40.0; // how long one poke lasts (ms). A brief stimulus: the question is whether activity OUTLASTS it.
+    private const double MemoryTauMs = 120.0; // smoothing for the panel bar only (slower than the motors, so a brief hold is easy to see)
+    private const double MemoryKick = 1.0; // bar activation added per memory spike
 
     // Neural integration: many small stable Euler steps per rendered frame (dt << Tau=10ms).
     private const double NeuralStepMs = 1.0;
@@ -119,7 +196,7 @@ public partial class BraitenbergFlyView : Node2D
             new Label
             {
                 Text =
-                    "Play 6 — Fruit fly seeks banana.  Crossed smell→motor wiring; seeking emerges.     (Esc = menu)",
+                    "Play 6b — Fruit fly + memory.  Drive head-on into a wall: the memory LATCHES and drives a committed turn that breaks the deadlock, then releases.  (SPACE = manual poke.)     (Esc = menu)",
                 Position = new Vector2(20, 20),
             }
         );
@@ -132,6 +209,14 @@ public partial class BraitenbergFlyView : Node2D
         if (@event is InputEventKey { Pressed: true, Keycode: Key.Escape })
         {
             GetTree().ChangeSceneToFile("res://PlayMenu.tscn");
+        }
+
+        // SPACE = a manual poke: owe the memory neuron a brief, strong input. _Process spends
+        // this down over the next MemoryPokeMs and then stops — so anything we see AFTER that is
+        // the neuron holding ITSELF, not us still pushing it.
+        if (@event is InputEventKey { Pressed: true, Keycode: Key.Space })
+        {
+            _pokeMsLeft = MemoryPokeMs;
         }
     }
 
@@ -155,13 +240,28 @@ public partial class BraitenbergFlyView : Node2D
         _net.SetInput(_wallR, WallGain * _wallR01);
         _net.SetInput(_motorL, MotorTonic);
         _net.SetInput(_motorR, MotorTonic);
+        // Nociceptor: a strong jolt while the body is actually colliding (set last frame), else
+        // silent. Proximity does NOT drive it — only a real ram does.
+        _net.SetInput(_noci, _colliding ? NociGain : 0.0);
 
         // 3. Run the brain a few stable substeps; integrate motor spikes into smooth activations.
         for (int k = 0; k < SubstepsPerFrame; k++)
         {
+            // Memory neuron input THIS substep: the poke current while we still owe poke time,
+            // otherwise nothing. Decrement the owed time by one substep so the kick is brief —
+            // after it runs out, the only thing that can keep the neuron firing is its own
+            // self-synapse. (Not wired to the body yet, so this is the isolation test.)
+            _net.SetInput(_memory, _pokeMsLeft > 0.0 ? MemoryPokeCurrent : 0.0);
+            if (_pokeMsLeft > 0.0)
+            {
+                _pokeMsLeft -= NeuralStepMs;
+            }
+
             _net.Step(NeuralStepMs);
             _actL += (NeuralStepMs / MotorTauMs) * (-_actL);
             _actR += (NeuralStepMs / MotorTauMs) * (-_actR);
+            _actMem += (NeuralStepMs / MemoryTauMs) * (-_actMem); // memory bar leaks slower than the motors, so a brief hold is easy to read
+            _actNoci += (NeuralStepMs / MemoryTauMs) * (-_actNoci); // nociceptor bar, same slow leak so a brief "ouch" stays visible
             if (_net.Fired(_motorL))
             {
                 _actL += MotorKick;
@@ -169,6 +269,14 @@ public partial class BraitenbergFlyView : Node2D
             if (_net.Fired(_motorR))
             {
                 _actR += MotorKick;
+            }
+            if (_net.Fired(_memory))
+            {
+                _actMem += MemoryKick; // each memory spike bumps its display bar; the self-synapse keeps the spikes coming
+            }
+            if (_net.Fired(_noci))
+            {
+                _actNoci += MemoryKick; // each nociceptor spike bumps its red "ouch" bar
             }
         }
 
@@ -184,10 +292,15 @@ public partial class BraitenbergFlyView : Node2D
 
         // Physical backstop only: the fly can't leave the screen. Steering AWAY from walls is
         // the brain's job now (the wall sensors above) — there is no scripted bounce anymore.
+        Vector2 beforeClamp = _pos;
         _pos = new Vector2(
             Mathf.Clamp(_pos.X, 20f, size.X - 20f),
             Mathf.Clamp(_pos.Y, 70f, size.Y - 20f)
         );
+        // Did the wall physically STOP the body this frame? Then the fly rammed it — a real
+        // collision, which is exactly what the nociceptor reports (next frame: a tiny reflex
+        // latency, since the brain already stepped above). Proximity alone never trips this.
+        _colliding = !_pos.IsEqualApprox(beforeClamp);
 
         // 5. Reached the banana? Move it to a fresh random corner so the fly keeps seeking.
         if (_pos.DistanceTo(_banana) < EatRadius)
@@ -262,6 +375,8 @@ public partial class BraitenbergFlyView : Node2D
         DrawMiniBar(134, 70, (float)(_actR / ActMax), "mR", Colors.LimeGreen);
         DrawMiniBar(180, 70, (float)_wallL01, "wL", Colors.OrangeRed); // wall-proximity sensors
         DrawMiniBar(214, 70, (float)_wallR01, "wR", Colors.OrangeRed);
+        DrawMiniBar(260, 70, (float)(_actMem / ActMax), "mem", Colors.Magenta); // the memory neuron: held activity AFTER a SPACE poke is the memory itself
+        DrawMiniBar(300, 70, (float)(_actNoci / ActMax), "noci", new Color(1f, 0.15f, 0.15f)); // the nociceptor: red "ouch", lights ONLY on a real wall ram
 
         // Compensation needle: the net steering the brain is producing this instant. Centered =
         // flying straight; the gold bar grows out toward whichever side the fly is turning, and

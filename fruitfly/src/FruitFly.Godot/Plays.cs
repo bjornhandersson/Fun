@@ -17,7 +17,9 @@ public static class Plays
         new("3 — Summation", "res://SummationView.tscn"), // two inputs pool onto one output; rate tracks combined drive
         new("4 — Inhibition", "res://InhibitionView.tscn"), // Input 2 negative: push vs pull, the brake
         new("5 — Loop", "res://LoopView.tscn"), // A ⇄ B mutual excitation via Network; self-sustaining = memory
-        new("6 — Braitenberg fly: seek + avoid", "res://BraitenbergFlyView.tscn"), // crossed smell→motor (seek) + uncrossed wall→motor (avoid), summed; emerges
+        new("5b — Memory: one self-exciting neuron", "res://MemoryNeuronView.tscn"), // Plan 0002 in isolation: one cell + a self-synapse; poke → hold → release
+        new("6 — Braitenberg fly: seek + avoid", "res://BraitenbergFlyView.tscn"), // starts at REST; crossed smell→motor (seek) + uncrossed wall→motor (avoid); motion emerges
+        new("6b — Braitenberg fly: + memory neuron", "res://BraitenbergFlyMemoryView.tscn"), // copy of 6 growing a self-exciting interneuron; Plan 0002. SPACE pokes it to test bistability
         new("7 — Two flies + walls", "res://TwoFliesView.tscn"), // ~300k neurons each: wall-avoidance EMERGES from neurons, no bounce cheat
     };
 }

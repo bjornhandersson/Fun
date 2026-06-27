@@ -22,31 +22,36 @@ namespace FruitFly;
 // changed the bookkeeping, not the biology.
 public class SpikingNet
 {
-    public readonly int N;                      // number of neurons
+    public readonly int N; // number of neurons
 
     // ---- Shared LIF parameters (one personality for the whole brain) ----------------
     // Same meaning as LifNeuron's fields. Shared scalars, not per-neuron arrays, because all
     // 200k neurons obey the same equation — what makes them differ is Bias[] below.
-    public double VRest = -65, VThreshold = -50, VReset = -70, Tau = 10, R = 1;
+    public double VRest = -65,
+        VThreshold = -50,
+        VReset = -70,
+        Tau = 10,
+        R = 1;
 
     // ---- Per-neuron state and inputs (the struct-of-arrays) --------------------------
-    public readonly double[] V;                 // membrane voltage of every neuron
-    public readonly double[] Bias;              // fixed per-neuron excitability offset (current units).
-                                                //   Heterogeneity is ESSENTIAL: identical neurons given
-                                                //   identical input would spike in lockstep, and the whole
-                                                //   population would behave like one neuron. Spreading Bias
-                                                //   staggers them, so the FRACTION of the pool firing rises
-                                                //   smoothly with drive — that smooth fraction IS the rate code.
-    public readonly double[] External;          // external input current you inject (sensory drive, tonic)
-    private readonly double[] _synIn;           // synaptic current arriving THIS tick (loaded last tick)
-    public readonly bool[] Fired;               // did neuron i fire on the most recent tick?
+    public readonly double[] V; // membrane voltage of every neuron
+    public readonly double[] Bias; // fixed per-neuron excitability offset (current units).
+
+    //   Heterogeneity is ESSENTIAL: identical neurons given
+    //   identical input would spike in lockstep, and the whole
+    //   population would behave like one neuron. Spreading Bias
+    //   staggers them, so the FRACTION of the pool firing rises
+    //   smoothly with drive — that smooth fraction IS the rate code.
+    public readonly double[] External; // external input current you inject (sensory drive, tonic)
+    private readonly double[] _synIn; // synaptic current arriving THIS tick (loaded last tick)
+    public readonly bool[] Fired; // did neuron i fire on the most recent tick?
 
     // ---- Synapses, first gathered loosely, then frozen into CSR ----------------------
-    private readonly List<int> _src = new();    // temporary edge lists, used only while wiring up
+    private readonly List<int> _src = new(); // temporary edge lists, used only while wiring up
     private readonly List<int> _dst = new();
     private readonly List<double> _w = new();
-    private int[] _rowStart = Array.Empty<int>();   // CSR: where source i's synapses begin
-    private int[] _target = Array.Empty<int>();     // CSR: target neuron of each synapse
+    private int[] _rowStart = Array.Empty<int>(); // CSR: where source i's synapses begin
+    private int[] _target = Array.Empty<int>(); // CSR: target neuron of each synapse
     private double[] _weight = Array.Empty<double>(); // CSR: weight of each synapse
     public int SynapseCount { get; private set; }
 
@@ -58,14 +63,19 @@ public class SpikingNet
         External = new double[n];
         _synIn = new double[n];
         Fired = new bool[n];
-        for (int i = 0; i < n; i++) V[i] = VRest;   // every neuron is born at rest
+        for (int i = 0; i < n; i++)
+        {
+            V[i] = VRest; // every neuron is born at rest
+        }
     }
 
     // Add one synapse source -> target with a weight (+ excitatory, - inhibitory). Cheap to
     // call hundreds of thousands of times; the real cost is paid once in Build().
     public void Connect(int source, int target, double weight)
     {
-        _src.Add(source); _dst.Add(target); _w.Add(weight);
+        _src.Add(source);
+        _dst.Add(target);
+        _w.Add(weight);
     }
 
     // Freeze the loose edge list into CSR (compressed sparse row), grouped by source.
@@ -84,9 +94,15 @@ public class SpikingNet
         _weight = new double[m];
 
         // Pass 1: count how many synapses leave each source (a histogram).
-        for (int k = 0; k < m; k++) _rowStart[_src[k] + 1]++;
+        for (int k = 0; k < m; k++)
+        {
+            _rowStart[_src[k] + 1]++;
+        }
         // Turn counts into start offsets by a running sum: row i now begins where row i-1 ended.
-        for (int i = 0; i < N; i++) _rowStart[i + 1] += _rowStart[i];
+        for (int i = 0; i < N; i++)
+        {
+            _rowStart[i + 1] += _rowStart[i];
+        }
         // Pass 2: drop each synapse into its source's slice, advancing a per-source cursor.
         int[] cursor = (int[])_rowStart.Clone();
         for (int k = 0; k < m; k++)
@@ -96,7 +112,9 @@ public class SpikingNet
             _target[at] = _dst[k];
             _weight[at] = _w[k];
         }
-        _src.Clear(); _dst.Clear(); _w.Clear();   // edge lists no longer needed; free them
+        _src.Clear();
+        _dst.Clear();
+        _w.Clear(); // edge lists no longer needed; free them
     }
 
     // Advance the WHOLE network by one tick of length dt (ms). Two phases, exactly mirroring
@@ -108,10 +126,18 @@ public class SpikingNet
         // Phase 1 — INTEGRATE. One flat streaming loop over all neurons.
         for (int i = 0; i < N; i++)
         {
-            double I = External[i] + Bias[i] + _synIn[i];      // everything pushing this neuron now
-            double v = V[i] + a * (-(V[i] - VRest) + R * I);   // same Euler step as LifNeuron
-            if (v >= VThreshold) { V[i] = VReset; Fired[i] = true; }
-            else                 { V[i] = v;      Fired[i] = false; }
+            double I = External[i] + Bias[i] + _synIn[i]; // everything pushing this neuron now
+            double v = V[i] + a * (-(V[i] - VRest) + R * I); // same Euler step as LifNeuron
+            if (v >= VThreshold)
+            {
+                V[i] = VReset;
+                Fired[i] = true;
+            }
+            else
+            {
+                V[i] = v;
+                Fired[i] = false;
+            }
         }
 
         // Phase 2 — SCATTER. Clear the inbox, then for each neuron that fired, deposit its
@@ -119,10 +145,15 @@ public class SpikingNet
         Array.Clear(_synIn, 0, N);
         for (int i = 0; i < N; i++)
         {
-            if (!Fired[i]) continue;                           // event-driven: silent neurons cost nothing
+            if (!Fired[i]) // event-driven: silent neurons cost nothing
+            {
+                continue;
+            }
             int end = _rowStart[i + 1];
             for (int k = _rowStart[i]; k < end; k++)
+            {
                 _synIn[_target[k]] += _weight[k];
+            }
         }
     }
 
@@ -131,8 +162,15 @@ public class SpikingNet
     // analogue of one neuron's rate. Steering will come from the DIFFERENCE of two of these.
     public int CountFired(int start, int count)
     {
-        int c = 0, end = start + count;
-        for (int i = start; i < end; i++) if (Fired[i]) c++;
+        int c = 0,
+            end = start + count;
+        for (int i = start; i < end; i++)
+        {
+            if (Fired[i])
+            {
+                c++;
+            }
+        }
         return c;
     }
 }

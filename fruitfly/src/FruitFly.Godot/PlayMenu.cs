@@ -18,7 +18,7 @@ public partial class PlayMenu : Control
         foreach (var play in Plays.All)
         {
             var button = new Button { Text = play.Title };
-            string path = play.ScenePath;   // capture per-iteration so the lambda loads the right scene
+            string path = play.ScenePath; // capture per-iteration so the lambda loads the right scene
             button.Pressed += () => GetTree().ChangeSceneToFile(path);
             box.AddChild(button);
         }

@@ -13,12 +13,12 @@ public class Network
 {
     private readonly List<LifNeuron> _neurons = new();
     private readonly List<Synapse> _synapses = new();
-    private readonly Dictionary<LifNeuron, int> _slot = new();   // neuron -> its index in the buffers below
+    private readonly Dictionary<LifNeuron, int> _slot = new(); // neuron -> its index in the buffers below
 
     // Per-neuron working buffers, indexed by slot. Reused every tick (no per-frame allocation).
-    private double[] _external = Array.Empty<double>();   // external input current you inject (e.g. a sensory drive)
-    private double[] _input = Array.Empty<double>();      // total current a neuron feels this tick
-    private bool[] _fired = Array.Empty<bool>();          // did each neuron fire this tick
+    private double[] _external = Array.Empty<double>(); // external input current you inject (e.g. a sensory drive)
+    private double[] _input = Array.Empty<double>(); // total current a neuron feels this tick
+    private bool[] _fired = Array.Empty<bool>(); // did each neuron fire this tick
 
     // Register a neuron with the network. Returns it so you can keep a handle.
     public LifNeuron Add(LifNeuron neuron)
@@ -54,16 +54,24 @@ public class Network
         // integrates and maybe fires. Because every neuron reads the same frozen
         // previous-tick synapse state, the order we loop in cannot change the result.
         for (int i = 0; i < _neurons.Count; i++)
+        {
             _input[i] = _external[i];
+        }
         foreach (var s in _synapses)
-            _input[_slot[s.Target]] += s.Current;       // deliver last tick's current to the target
+        {
+            _input[_slot[s.Target]] += s.Current; // deliver last tick's current to the target
+        }
         for (int i = 0; i < _neurons.Count; i++)
+        {
             _fired[i] = _neurons[i].Step(_input[i], dt);
+        }
 
         // Phase 2 — ADVANCE. Each synapse decays and, if its source fired THIS tick, takes a
         // fresh kick — loading the current it will deliver on the NEXT tick. The gap between
         // a source firing now and the target feeling it next tick IS the transmission delay.
         foreach (var s in _synapses)
+        {
             s.Step(_fired[_slot[s.Source]], dt);
+        }
     }
 }

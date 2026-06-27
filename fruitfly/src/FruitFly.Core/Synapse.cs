@@ -10,10 +10,11 @@ namespace FruitFly;
 // post-synaptic current. Two spikes that land close in time therefore overlap and add up.
 public class Synapse
 {
-    public LifNeuron Source { get; init; }   // whose spikes drive this connection
-    public LifNeuron Target { get; init; }   // who receives the current
-    public double Weight { get; init; }      // current added per source spike;
-                                             // + = excitatory (push target up), - = inhibitory (push down)
+    public LifNeuron Source { get; init; } // whose spikes drive this connection
+    public LifNeuron Target { get; init; } // who receives the current
+    public double Weight { get; init; } // current added per source spike;
+
+    // + = excitatory (push target up), - = inhibitory (push down)
 
     // Synaptic time constant (ms): how fast the post-synaptic current decays back toward
     // zero after a spike. ~5 ms is realistic for a fast excitatory synapse. Bigger = the
@@ -43,7 +44,9 @@ public class Synapse
         // 2. Kick: a presynaptic spike dumps a fresh Weight of current on TOP of whatever
         //    is still lingering. That stacking is exactly how inputs summate over time.
         if (sourceFired)
+        {
             Current += Weight;
+        }
 
         return Current;
     }

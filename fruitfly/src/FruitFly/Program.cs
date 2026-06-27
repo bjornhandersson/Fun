@@ -12,24 +12,28 @@ internal static class Program
         // Two neurons wired in a line: A drives B through one synapse.
         var a = new LifNeuron();
         var b = new LifNeuron();
-        var synapse = new Synapse(a, b, weight: 160.0);  // big: one A-spike alone pushes B over threshold
+        var synapse = new Synapse(a, b, weight: 160.0); // big: one A-spike alone pushes B over threshold
 
-        const double dt = 1.0;       // ms per step
-        const double drive = 20.0;   // constant input to A (above rheobase → A fires periodically)
+        const double dt = 1.0; // ms per step
+        const double drive = 20.0; // constant input to A (above rheobase → A fires periodically)
         const int steps = 60;
 
-        Console.WriteLine($"Each panel: V from {ScaleLow} to {ScaleHigh} mV;  '|' = threshold,  '*' = V");
-        Console.WriteLine("   A (driven by constant input)        B (fed by A through the synapse)");
+        Console.WriteLine(
+            $"Each panel: V from {ScaleLow} to {ScaleHigh} mV;  '|' = threshold,  '*' = V"
+        );
+        Console.WriteLine(
+            "   A (driven by constant input)        B (fed by A through the synapse)"
+        );
 
         for (int step = 0; step < steps; step++)
         {
-            bool aFired = a.Step(drive, dt);        // 1. run A on its external drive
-            double toB = synapse.Step(aFired, dt);  // 2. advance the synapse → current for B (now decays over steps)
-            bool bFired = b.Step(toB, dt);          // 3. run B on whatever the synapse delivered
+            bool aFired = a.Step(drive, dt); // 1. run A on its external drive
+            double toB = synapse.Step(aFired, dt); // 2. advance the synapse → current for B (now decays over steps)
+            bool bFired = b.Step(toB, dt); // 3. run B on whatever the synapse delivered
 
             Console.WriteLine(
-                Panel(a.V, a.VThreshold, aFired) + "   " +
-                Panel(b.V, b.VThreshold, bFired));
+                Panel(a.V, a.VThreshold, aFired) + "   " + Panel(b.V, b.VThreshold, bFired)
+            );
         }
     }
 
@@ -38,12 +42,12 @@ internal static class Program
     {
         var line = new char[Width];
         Array.Fill(line, ' ');
-        line[Col(vThreshold)] = '|';   // the firing line, for reference
-        line[Col(v)] = '*';            // the membrane voltage right now
+        line[Col(vThreshold)] = '|'; // the firing line, for reference
+        line[Col(v)] = '*'; // the membrane voltage right now
         return new string(line) + (spiked ? " SPIKE" : "      ");
     }
 
     // Map a voltage to a column on the scale.
-    private static int Col(double v)
-        => Math.Clamp((int)((v - ScaleLow) / (ScaleHigh - ScaleLow) * Width), 0, Width - 1);
+    private static int Col(double v) =>
+        Math.Clamp((int)((v - ScaleLow) / (ScaleHigh - ScaleLow) * Width), 0, Width - 1);
 }

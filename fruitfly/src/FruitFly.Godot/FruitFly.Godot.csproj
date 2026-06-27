@@ -1,5 +1,4 @@
 <Project Sdk="Godot.NET.Sdk/4.7.0">
-
   <PropertyGroup>
     <!-- net10.0 to match Core/console and the only runtime installed on this machine.
          Godot's template defaults this to net8.0; we override it deliberately. -->
@@ -14,5 +13,4 @@
   <ItemGroup>
     <ProjectReference Include="..\FruitFly.Core\FruitFly.Core.csproj" />
   </ItemGroup>
-
 </Project>

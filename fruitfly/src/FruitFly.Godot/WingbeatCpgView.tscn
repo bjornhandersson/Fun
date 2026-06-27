@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://WingbeatCpgView.cs" id="1_wingcpg"]
+
+[node name="WingbeatCpgView" type="Node2D"]
+script = ExtResource("1_wingcpg")

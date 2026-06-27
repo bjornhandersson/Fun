@@ -13,6 +13,10 @@ internal static class Program
         FlyHeadlessCheck.Run();
         Console.WriteLine();
 
+        // Rung 1 of the flight roadmap: two neurons making their own rhythm (Plan 0007).
+        HalfCentreOscillatorCheck.Run();
+        Console.WriteLine();
+
         // Two neurons wired in a line: A drives B through one synapse.
         var a = new LifNeuron();
         var b = new LifNeuron();

@@ -21,6 +21,10 @@ internal static class Program
         FlyingBodyCheck.Run();
         Console.WriteLine();
 
+        // Plan 0008+: vertical chemotaxis — the body climbs the odour gradient to the food's height.
+        AltitudeSeekCheck.Run();
+        Console.WriteLine();
+
         // Two neurons wired in a line: A drives B through one synapse.
         var a = new LifNeuron();
         var b = new LifNeuron();

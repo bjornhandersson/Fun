@@ -2,41 +2,57 @@ using FruitFly.Living; // the FlyingBody lives here; this is just a thin viewer 
 
 namespace FruitFly;
 
-// Plan 0008, step 1: SHOW that a fixed wingbeat cannot hover. We drop a FlyingBody at 300px and
-// watch its altitude — with a constant beat, lift ≠ weight, so it sinks (or climbs) and never holds.
-// This failure is what motivates the reflex (sense vertical motion → adjust the beat) added next.
+// Plan 0008: the wingbeat holds the body up. We knock a body DOWNWARD (start falling at 150 px/s)
+// twice — once with a FIXED beat (it keeps falling, can't hover) and once with the REFLEX (it
+// senses the drop, beats harder, arrests the fall, and settles into a hover). The hold emerges from
+// the loop, nothing scripted.
 internal static class FlyingBodyCheck
 {
     public static bool Run()
     {
-        var body = new FlyingBody(startAltitude: 300.0);
-        double startAlt = body.Altitude;
+        bool offDiverged = RunOne("fixed beat — no reflex", reflex: false);
+        Console.WriteLine();
+        bool onDiverged = RunOne("with reflex — senses the drop, beats harder", reflex: true);
+
+        bool pass = offDiverged && !onDiverged; // fixed falls away; reflex holds
+        Console.WriteLine(
+            $"[altitude]  → {(pass ? "PASS — the reflex makes a hover emerge" : "FAIL")}"
+        );
+        return pass;
+    }
+
+    // Returns true if the body did NOT hold (crashed through the floor or never settled).
+    private static bool RunOne(string label, bool reflex)
+    {
+        var body = new FlyingBody(startAltitude: 300.0, reflex: reflex, startVelocity: -150.0);
 
         const double dt = 1.0 / 60.0;
-        const double totalS = 3.0;
+        const double totalS = 4.0;
         double sinceSample = 0.0;
 
-        Console.WriteLine("[altitude]  fixed beat — bar length = height (start 300px).  Watch it sink:");
+        Console.WriteLine($"[altitude]  {label}  (start 300px, knocked down at 150px/s):");
         for (double t = 0.0; t < totalS; t += dt)
         {
             body.Step(dt);
             sinceSample += dt;
-            if (sinceSample >= 0.15)
+            if (sinceSample >= 0.2)
             {
                 sinceSample = 0.0;
                 Console.WriteLine(AltRow(body.Altitude));
             }
         }
 
-        bool diverged = Math.Abs(body.Altitude - startAlt) > 100.0; // it did NOT hold
+        bool crashed = body.Altitude < 20.0;
+        bool stillMoving = Math.Abs(body.VerticalVelocity) > 40.0;
+        bool diverged = crashed || stillMoving;
         Console.WriteLine(
-            $"[altitude]  start={startAlt:0}px  end={body.Altitude:0}px  →  "
-                + $"{(diverged ? "DIVERGED — a fixed beat can't hold altitude (reflex needed next)" : "held?! (unexpected)")}"
+            $"            end {body.Altitude:0}px, vel {body.VerticalVelocity:+0;-0}px/s  →  "
+                + $"{(diverged ? "did NOT hold" : "HOLDING a hover")}"
         );
         return diverged;
     }
 
-    // Altitude as a horizontal bar: longer = higher. As the body falls, the bar shrinks.
+    // Altitude as a horizontal bar: longer = higher. Falling shrinks it; a hover holds it steady.
     private static string AltRow(double alt)
     {
         const int w = 40;

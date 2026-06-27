@@ -51,8 +51,16 @@ public sealed class HalfCentreOscillator
         _net.Connect(_l, _r, -Inhib); // L firing pushes R DOWN (negative weight = inhibitory)
         _net.Connect(_r, _l, -Inhib); // R firing pushes L DOWN — the mutual half of the inhibition
 
-        _net.SetInput(_l, Drive); // the steady command — set once, persists across ticks
-        _net.SetInput(_r, Drive);
+        SetCommand(Drive); // start at the default steady command
+    }
+
+    // Set the "command to fly" driving both cells. The isolation demo (Play 7) leaves it at the
+    // default Drive; a reflex (Plan 0008) calls this each tick to beat HARDER or softer — more
+    // command ⇒ faster firing ⇒ more vigour ⇒ more lift.
+    public void SetCommand(double drive)
+    {
+        _net.SetInput(_l, drive);
+        _net.SetInput(_r, drive);
     }
 
     // Advance the circuit by one tick of dtMs and fold the new spikes into the activity outputs.

@@ -53,11 +53,26 @@ the **correction that actually holds it must be neural**, and we must be able to
       [[0007]] wingbeat at a **fixed** command. `FlyingBodyCheck` (console) drops it from 300px and it
       sinks, *accelerating*, straight through the floor (`end −593px → DIVERGED`). Fixed beat → no
       hover, exactly as the concept predicts. This motivates the reflex.
-- [ ] **Add the vertical-motion sense + reflex loop** — a transducer for descent/ascent feeding the
-      wingbeat's drive through neurons (negative feedback). Tune until **altitude-holding emerges**:
-      drop it and it beats harder and recovers.
-- [ ] **Side-view play** — a Godot view (height on the vertical axis, time scrolling) so we watch it
-      sag, beat, recover, and settle into a hover. The beat from Play 7 now visibly *does something*.
+- [x] **Add the vertical-motion sense + reflex loop** — two opponent receptors (`_descent`/`_ascent`,
+      in `FlyingBody`) transduce vertical velocity into spikes; their smoothed activity sets the
+      wingbeat command (`HalfCentreOscillator.SetCommand`): dropping → beat harder, rising → ease off.
+      Knocked downward at 150 px/s, the fixed beat falls through the floor (−1575px) while the reflex
+      **arrests the fall and settles to a hover** (~−22 px/s drift) — `PASS`. Two honest calibrations
+      it taught us: (1) `LiftGain` had to be sized so the *baseline* beat ≈ weight (morphology — the
+      wings can lift the body), so v=0 is the equilibrium; (2) the receptor had to be sensitive enough
+      (`SenseGain`) that its firing-threshold deadband doesn't leave a steady sink. The hold is the
+      loop, not a setpoint.
+- [x] **Side-view play** — Godot **Play 8** (`HoverView`), a pure viewer of `FlyingBody`: the fly at
+      its altitude over a floor, a scrolling altitude trace, and live gauges (lift, drop-sense,
+      rise-sense). Interactive: **Space shoves it down** (an external disturbance, like the memory
+      poke), and you watch the reflex beat harder and haul it back.
+- [x] **Bonus — vertical chemotaxis** (a step toward [[0006]]'s full fly): a food source emits an
+      odour peaking at its height; two smell receptors a span apart compare it and bias the wingbeat
+      command — food above ⇒ climb, below ⇒ descend — so the fly **flies to the food's height** and
+      the hover reflex holds it there. Verified headless (`AltitudeSeekCheck`: climbs to a high food,
+      follows it down — `PASS`); in **Play 8** you move the food with **↑/↓** and watch the fly chase
+      it. The vertical twin of the 2D banana-seeking. Tuning notes: wide receptor span + strong gain
+      keep the climb authoritative right up to the food (a too-wide odour goes mushy near the peak).
 - [ ] **Docs:** update this plan, [[0006]], [[0007]], and the FOUNDATIONS index as altitude lands.
 
 ## Open questions to resolve with the user (when we hit them)

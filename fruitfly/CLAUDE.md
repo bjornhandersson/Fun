@@ -67,8 +67,10 @@ Euler step in a data-oriented SoA + CSR layout) for large populations. A Godot g
 visualises the circuits built so far: single neuron, two-neuron chain, summation, inhibition,
 a self-sustaining loop, a memory neuron in isolation, the assembled Braitenberg **fruit fly**
 (Play 6) — it seeks a banana by smell, avoids walls by **touch**, and latches a memory of being
-stuck to break free — and a **wingbeat CPG** (Play 7): two neurons that generate their own rhythm
-(mutual inhibition + fatigue), the first step toward neural flight. All behaviour **emerges from
+stuck to break free — a **wingbeat CPG** (Play 7): two neurons that generate their own rhythm
+(mutual inhibition + fatigue); and a **hover** (Play 8, 2.5D): a body with mass + gravity whose
+wingbeat makes lift, held aloft by a neural reflex (sense dropping → beat harder) — shove it and it
+recovers. The last two are the first steps toward neural flight. All behaviour **emerges from
 wiring** — no view lets the engine make a decision. (Earlier redundant fly demos — a memoryless fly
 and a two-flies population view — were removed once 6 superseded them.)
 See [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).

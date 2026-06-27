@@ -62,10 +62,19 @@ motor *pattern*, not the kinematics.
       a scrolling timeline — L fills up from a centre line (magenta), R fills down (cyan), so the
       alternation swings above/below the line. A flat "steady drive" bar on the left makes the point
       visible: constant input in, rhythmic output out. No neurons or params duplicated in the viewers.
-- [ ] **Read the rhythm out** — turn each half-centre's activity into a wingbeat amplitude signal.
-- [ ] **Wire it into the fly's wings** — the oscillator drives the beat; sensory steering modulates
-      its left/right amplitude (sets up rung 2). Confirm the fly still seeks/avoids, now *beating*.
-- [ ] **Docs:** update this plan, the FOUNDATIONS index, and roadmap [[0006]] as rung 1 lands.
+- [x] **Tried wiring it into the fly's wings (2D) — and learned it doesn't belong here yet.** Gated
+      the fly's thrust by the beat two ways: (a) by the instantaneous power stroke → steering turned
+      on/off with each stroke, the fly couldn't turn through the troughs and pinned to walls
+      (`longestStuck 371`, FAIL); (b) by a smooth "beating" envelope → to keep steering smooth the
+      envelope has to be near-*constant*, making the beat a behaviourally **inert** multiplier.
+      **Conclusion (the substrate talking):** a wingbeat has **no honest job in a 2D top-down world**
+      — up here thrust is just "go forward"; the beat's real purpose is generating **lift against
+      gravity**, which only exists in 3D. So rung 2 (beat drives the body) effectively **merges into
+      rung 3 (3D)**. Reverted the fly integration so nothing fake/inert is left; the fly passes at its
+      proven baseline (`path 4339, longestStuck 58`). Wingbeat circuit + Play 7 stay as-is.
+- [ ] **Wire the beat → thrust → LIFT in 3D** (now part of [[0006]] rung 3): the wings beat, the
+      power stroke makes lift to hold the fly up, and left/right amplitude steers. This is where the
+      beat finally earns its keep.
 
 ## Open questions to resolve with the user
 

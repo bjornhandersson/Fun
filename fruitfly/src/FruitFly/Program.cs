@@ -17,6 +17,10 @@ internal static class Program
         HalfCentreOscillatorCheck.Run();
         Console.WriteLine();
 
+        // Plan 0008 step 1: gravity + lift from the wingbeat — a fixed beat can't hover (yet).
+        FlyingBodyCheck.Run();
+        Console.WriteLine();
+
         // Two neurons wired in a line: A drives B through one synapse.
         var a = new LifNeuron();
         var b = new LifNeuron();

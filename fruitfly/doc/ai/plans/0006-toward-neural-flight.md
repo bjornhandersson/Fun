@@ -41,15 +41,17 @@ fly can't *fall*. Everything below grows out of fixing exactly those two gaps.
   (done), and already foreshadowed as "spontaneous activity" in Plan 0002's deferred list. The
   wingbeat **amplitude/frequency** becomes the controllable variable; thrust still comes from a
   trivial constant (no aerodynamics yet). *This is the next concrete step and gets its own plan.*
-- **Rung 2 — Steering by bilateral asymmetry.** Neural modulation of **left vs. right stroke
-  amplitude** → a yaw torque. This *replaces* today's differential-drive fake with the real thing:
-  a fly turns by beating one wing harder than the other. Forces still planar.
-- **Rung 3 — Make it 3D (the body becomes a body in space).** Position gains **X, Y, Z**;
-  orientation gains **pitch/roll/yaw**; the body gains **mass** and feels **gravity**. The fly must
-  now generate **lift** or it falls. The Godot viewer goes **3D** (cool in itself). Crucially this
-  turns flight into a real **control problem**: staying aloft and upright can't be scripted, so it
-  becomes a rich source of new circuits (equilibrium reflexes, and later the haltere sense). Big,
-  self-contained, exciting milestone.
+- **Rungs 2 + 3 — Make it 3D and let the beat drive the body (now ONE step).** *Originally rung 2
+  was "steer by bilateral asymmetry" in 2D and rung 3 was "go 3D" — but trying to wire the wingbeat
+  into the 2D fly proved it has no honest job there (see [[0007]]): in a top-down world thrust is
+  just "go forward", so the beat either chokes the steering or is an inert constant. A wingbeat's
+  real purpose is **lift against gravity**, which only exists in 3D. So these merge.* The body gains
+  **X, Y, Z** position, **pitch/roll/yaw** orientation, **mass**, and **gravity**; the Godot viewer
+  goes **3D** (cool in itself). The wingbeat's power stroke now makes **lift** to hold the fly up,
+  and **left vs. right stroke amplitude** steers (a fly turns by beating one wing harder). The fly
+  must generate lift or it falls — flight becomes a real **control problem** that can't be scripted,
+  a rich source of new circuits (equilibrium reflexes, later the haltere sense). Big, exciting
+  milestone, and where the beat from rung 1 finally earns its keep.
 - **Rung 4 — Honest aerodynamics (climb the force ladder).** Swap the force constant for a
   **quasi-steady blade-element** model: a wing's force from its instantaneous velocity and angle of
   attack (translational + rotational + added-mass terms). This is the rung that makes wing control

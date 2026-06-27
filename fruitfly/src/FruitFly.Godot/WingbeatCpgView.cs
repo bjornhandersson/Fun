@@ -36,8 +36,8 @@ public partial class WingbeatCpgView : Node2D
         var title = new Label
         {
             Text =
-                "Play 7 — Wingbeat CPG.  Two neurons take turns: magenta = LEFT, cyan = RIGHT.  "
-                + "A steady drive (flat bar, left) goes in; a rhythmic beat comes out.  No timer.     (Esc = menu)",
+                "Play 7 — Wingbeat CPG.  Two neurons take turns (downstroke vs upstroke) and that beat flaps the wings above.  "
+                + "Both wings share ONE beat — they flap IN PHASE.  Steady drive in, rhythm out.  No timer.     (Esc = menu)",
             Position = new Vector2(24, 22),
         };
         title.AddThemeFontSizeOverride("font_size", 20);
@@ -93,15 +93,17 @@ public partial class WingbeatCpgView : Node2D
 
     // ---- Drawing: the scrolling timeline ----
     private const float StripX = 180f,
-        StripY = 140f,
+        StripY = 300f, // pushed down to leave room for the live flapping wings above
         StripW = 900f,
-        StripH = 430f;
+        StripH = 300f;
 
     public override void _Draw()
     {
         Font font = ThemeDB.FallbackFont;
         float cy = StripY + StripH * 0.5f; // the centre line = silence; fills grow away from it
         float halfH = StripH * 0.5f;
+
+        DrawFlappingWings(font); // the live wingbeat the oscillator is driving, right now
 
         DrawRect(new Rect2(StripX, StripY, StripW, StripH), new Color(1, 1, 1, 0.05f)); // backdrop
 
@@ -131,9 +133,44 @@ public partial class WingbeatCpgView : Node2D
         float nowX = StripX + StripW;
         DrawLine(new Vector2(nowX, StripY), new Vector2(nowX, StripY + StripH), new Color(1, 1, 1, 0.4f)); // "now"
 
-        DrawString(font, new Vector2(StripX + 10f, StripY + 24f), "LEFT wing",
+        DrawString(font, new Vector2(StripX + 10f, StripY + 24f), "downstroke cell",
             HorizontalAlignment.Left, -1, 20, new Color(1f, 0.5f, 1f, 0.85f));
-        DrawString(font, new Vector2(StripX + 10f, StripY + StripH - 10f), "RIGHT wing",
+        DrawString(font, new Vector2(StripX + 10f, StripY + StripH - 10f), "upstroke cell",
             HorizontalAlignment.Left, -1, 20, new Color(0.4f, 0.9f, 1f, 0.9f));
+    }
+
+    // The live wingbeat: ONE oscillator drives BOTH wings, so they flap together (in phase). When
+    // the downstroke cell (magenta) leads, the wings swing DOWN; when the upstroke cell (cyan)
+    // leads, they swing UP. This is the honest mapping of a half-centre to a wingbeat — the two
+    // sides are the up/down antagonists of one stroke, NOT the left and right wings.
+    private void DrawFlappingWings(Font font)
+    {
+        float cx = StripX + StripW * 0.5f; // centred over the chart
+        float cy = 175f; // up near the top, above the timeline (clear of the readout text)
+        var hinge = new Vector2(cx, cy);
+
+        // Stroke phase from the two cells: +1 = upstroke leading, -1 = downstroke leading.
+        float phase = Mathf.Clamp((float)(_cpg.RightActivity - _cpg.LeftActivity), -1f, 1f);
+        float tilt = phase * 0.7f; // radians the wings lift (up) or drop (down) from level
+
+        const float len = 120f;
+        // Both wings take the SAME tilt → they flap in phase. "-Sin" because screen-y points down.
+        Vector2 leftTip = hinge + new Vector2(-Mathf.Cos(tilt), -Mathf.Sin(tilt)) * len;
+        Vector2 rightTip = hinge + new Vector2(Mathf.Cos(tilt), -Mathf.Sin(tilt)) * len;
+
+        // Colour the wings by stroke phase: magenta on the downstroke, cyan on the up.
+        Color wing = new Color(1f, 0.5f, 1f).Lerp(new Color(0.3f, 0.85f, 1f), (phase + 1f) * 0.5f);
+
+        // Faint guide showing the top and bottom of the stroke, so the swing reads as up/down.
+        float reach = Mathf.Sin(0.7f) * len;
+        DrawLine(new Vector2(cx - len, cy - reach), new Vector2(cx + len, cy - reach), new Color(1, 1, 1, 0.08f), 1f);
+        DrawLine(new Vector2(cx - len, cy + reach), new Vector2(cx + len, cy + reach), new Color(1, 1, 1, 0.08f), 1f);
+
+        DrawLine(hinge, leftTip, wing, 7f);
+        DrawLine(hinge, rightTip, wing, 7f);
+        DrawCircle(hinge, 11f, Colors.WhiteSmoke); // the fly's body between the wings
+
+        DrawString(font, new Vector2(cx - 150f, cy + reach + 34f), "one shared beat → both wings flap in phase",
+            HorizontalAlignment.Left, -1, 16, new Color(1, 1, 1, 0.6f));
     }
 }

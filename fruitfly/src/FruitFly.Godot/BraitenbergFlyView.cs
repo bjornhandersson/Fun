@@ -23,7 +23,7 @@ using FruitFly;   // LifNeuron + Synapse + Network from FruitFly.Core
 // wheel → the fly yaws right, away from it. Seeking (crossed) and avoiding (uncrossed) feed
 // the SAME two motors, so the behaviors just SUM — no arbitration code. The only non-neural
 // thing left is a hard clamp so the fly physically can't leave the screen.
-public partial class NamedNeuronFlyView : Node2D
+public partial class BraitenbergFlyView : Node2D
 {
 	// ---- Brain (FruitFly.Core) ----------------------------------------------------
 	private readonly Network _net = new();
@@ -37,7 +37,7 @@ public partial class NamedNeuronFlyView : Node2D
 	private readonly LifNeuron _wallL = new();
 	private readonly LifNeuron _wallR = new();
 
-	public NamedNeuronFlyView()
+	public BraitenbergFlyView()
 	{
 		_net.Add(_sensorL); _net.Add(_sensorR);
 		_net.Add(_motorL);  _net.Add(_motorR);

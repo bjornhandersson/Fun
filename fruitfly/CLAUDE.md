@@ -41,13 +41,14 @@ prime directive. Follow these rules in every interaction:
 
 ## Current status
 
-Stack decided; AI harness established. **Milestone 0 underway — LIF neuron and synapse
-built, now wiring chains.** `LifNeuron` (state + parameters + an Euler `Step`) and
-`Synapse` (turns a source spike event into target input current) are done and verified.
-The `Program` driver wires a **2-neuron chain** (A driven by constant input → B through one
-synapse) and renders dual ASCII voltage panels: A fires periodically and each A-spike
-drives B over threshold. **Next:** extend to a 3-neuron chain (input → middle → output).
-See the active plan: [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
+Stack decided; AI harness established. The neural substrate is built and verified:
+`LifNeuron` and `Synapse` for small hand-wired circuits, plus `SpikingNet` (the *same* LIF
+Euler step in a data-oriented SoA + CSR layout) for large populations. A Godot gallery
+visualises the circuits built so far: single neuron, two-neuron chain, summation, inhibition,
+a self-sustaining loop, a Braitenberg **fruit fly** that seeks a banana and avoids walls, and
+two ~300,000-neuron flies steered by population firing rates. All behaviour **emerges from
+wiring** — no view lets the engine make a decision.
+See [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
 
 ## AI structure
 

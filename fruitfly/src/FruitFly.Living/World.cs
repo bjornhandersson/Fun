@@ -4,7 +4,7 @@ namespace FruitFly.Living;
 
 // The WORLD the fly lives in: a banana to seek and four walls to avoid. Pure geometry and
 // scalar fields — no brain here, and (per ADR 0005) no Godot types. The fly QUERIES this:
-// "how strong is the smell here?", "how near is a wall here?", "clamp me inside", "did I eat?".
+// "how strong is the smell here?", "am I touching a wall here?", "clamp me inside", "did I eat?".
 public sealed class World
 {
     // Play-field bounds (world units). The SAME numbers feed both the wall-proximity field and
@@ -15,7 +15,6 @@ public sealed class World
 
     private const double SmellStrength = 1.0; // concentration at the banana itself
     private const double SmellFalloff = 420.0; // px at which smell halves — big, reaches across the field
-    private const double WallFalloff = 45.0; // px at which wall proximity halves — small, felt only when near
     private const float EatRadius = 42f; // within this the banana is eaten and respawns
     private const float CornerInset = 90f; // how far in from a corner a (re)spawned banana sits
 
@@ -38,23 +37,19 @@ public sealed class World
         return SmellStrength / (1.0 + r * r);
     }
 
-    // How near is the nearest of the four walls at `at`? 1 right at a wall, ~0 far away. Mirrors
-    // Smell(): the four bounds are the SAME ones Clamp() uses, so the sensor feels exactly the
-    // wall the body can't cross.
-    public double WallProximity(Vector2 at)
+    // Is the point `at` physically TOUCHING a wall? Zero-range CONTACT, not distance: a bristle
+    // either is deflected by the surface or it isn't — there is no "how near". True when `at` has
+    // reached or crossed any of the four bounds — the SAME bounds Clamp() enforces, so an antenna
+    // touches exactly the wall the body cannot cross. (Antennae reach past the body, so they make
+    // contact while the body centre is still inside.) This is the honest replacement for the old
+    // god's-eye proximity field: nothing on a fly can sense distance-to-wall, but a bristle can
+    // sense touch.
+    public bool Touching(Vector2 at)
     {
-        float maxX = Size.X - Margin;
-        float maxY = Size.Y - Margin;
-        float d = MathF.Min(
-            MathF.Min(at.X - MinX, maxX - at.X),
-            MathF.Min(at.Y - MinY, maxY - at.Y)
-        );
-        if (d < 0f) // poked past the bound → treat as touching
-        {
-            d = 0f;
-        }
-        double r = d / WallFalloff;
-        return 1.0 / (1.0 + r * r);
+        return at.X <= MinX
+            || at.X >= Size.X - Margin
+            || at.Y <= MinY
+            || at.Y >= Size.Y - Margin;
     }
 
     // Keep a body inside the field. Returns the clamped position and reports whether the wall

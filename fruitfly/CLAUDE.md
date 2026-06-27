@@ -65,9 +65,11 @@ Stack decided; AI harness established. The neural substrate is built and verifie
 `LifNeuron` and `Synapse` for small hand-wired circuits, plus `SpikingNet` (the *same* LIF
 Euler step in a data-oriented SoA + CSR layout) for large populations. A Godot gallery
 visualises the circuits built so far: single neuron, two-neuron chain, summation, inhibition,
-a self-sustaining loop, a Braitenberg **fruit fly** that seeks a banana and avoids walls, and
-two ~300,000-neuron flies steered by population firing rates. All behaviour **emerges from
-wiring** — no view lets the engine make a decision.
+a self-sustaining loop, a memory neuron in isolation, and the assembled Braitenberg **fruit fly**
+(Play 6) — it seeks a banana by smell, avoids walls by **touch**, and latches a memory of being
+stuck to break free. All behaviour **emerges from wiring** — no view lets the engine make a
+decision. (Earlier redundant fly demos — a memoryless fly and a two-flies population view — were
+removed once 6 superseded them.)
 See [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
 
 ## AI structure

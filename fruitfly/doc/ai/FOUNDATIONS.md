@@ -100,13 +100,15 @@ Task-level plans live in `plans/`. One plan per task/milestone.
 | Plan | Status | Summary |
 |------|--------|---------|
 | [0001 — Milestone 0: LIF neuron](plans/0001-milestone-0-lif-neuron.md) | In progress | Single LIF neuron + synapse + 3-neuron chain; voltage trace. Get the math right before any engine. |
-| [0002 — Persistent internal state (memory)](plans/0002-persistent-state-memory.md) | Working | First slice of "brain": a self-sustaining interneuron + spike-frequency adaptation gives the fly memory of being stuck, so it breaks free on its own. Built in isolation (5b) and in the fly (6b). |
+| [0002 — Persistent internal state (memory)](plans/0002-persistent-state-memory.md) | Working | First slice of "brain": a self-sustaining interneuron + spike-frequency adaptation gives the fly memory of being stuck, so it breaks free on its own. Built in isolation (5b) and in the fly (6). |
 | [0003 — Extract creatures into `FruitFly.Living`](plans/0003-extract-creatures-into-living.md) | Fly done | The memory fly is extracted into Godot-free `FruitFly.Living` (Fly + World); the Godot view is a pure viewer; a headless console check asserts the wall-escape. Remaining: migrate the gallery circuits. |
+| [0004 — Honest wall sensing, part 1: touch](plans/0004-honest-wall-sensing-touch.md) | Built (Living fly) | Ripped out the fake distance-to-wall field (a god's-eye number no fly could sense); `World.Touching` now reports real contact and the fly's wall neurons are touch receptors. The fly skims walls and the memory latch frees each jam — headless gate passes. Vision/looming deferred to 0005. |
 
-_Several circuits (Braitenberg seeking, summation, inhibition, self-sustaining loop, the
-~300k-neuron flies) were built **without** their own plans — a documentation gap to backfill.
-Remaining future milestones (decision circuit, ring-attractor compass, spontaneous search,
-connectome subgraphs) will each get a plan when we reach them._
+_Several circuits (Braitenberg seeking, summation, inhibition, self-sustaining loop) were built
+**without** their own plans — a documentation gap to backfill. (The memoryless Braitenberg fly
+and the two ~300k-neuron flies view were removed once Play 6 superseded them.) Remaining future
+milestones (decision circuit, ring-attractor compass, spontaneous search, connectome subgraphs)
+will each get a plan when we reach them._
 
 ## Decision index (ADRs)
 

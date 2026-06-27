@@ -34,8 +34,9 @@ types, and leaves behaviour untestable except by eye. The user caught it.
 - [x] **Prove it headless:** `FlyHeadlessCheck` (console) drives the fly into the corner and
       asserts it moves and never stays stuck > ~4 s. Result: `path≈5500px, longestStuck≈125
       steps → PASS`.
-- [ ] **Migrate the rest** (single neuron, chain, summation, inhibition, loop, the plain fly,
-      two-flies, memory Play 5b) into `FruitFly.Living`, opportunistically.
+- [ ] **Migrate the rest** (single neuron, chain, summation, inhibition, loop, memory Play 5b)
+      into `FruitFly.Living`, opportunistically. (The plain fly and two-flies views were deleted
+      as redundant once Play 6 superseded them — nothing left to migrate there.)
 - [ ] Promote the headless check into a real test project (xUnit) once we want a CI gate.
 
 ## Boundary test (keeps us honest)

@@ -8,9 +8,9 @@ namespace FruitFly.Living;
 // Step(world, dt) each frame, and reads its state to draw. Nothing here decides anything outside
 // the neurons — steering, seeking, avoiding and escaping all EMERGE from the wiring.
 //
-// Smell sensors are CROSS-wired to the motors (seeking); wall sensors are UNCROSSED (avoiding);
-// both sum at the shared motors. A self-exciting memory neuron, charged by sustained wall
-// contact, latches "I'm stuck" and INHIBITS one wheel to break a head-on deadlock, then releases
+// Smell sensors are CROSS-wired to the motors (seeking); touch receptors are UNCROSSED (avoiding);
+// both sum at the shared motors. A self-exciting memory neuron, charged by repeated wall
+// contact, latches "I'm stuck" and INHIBITS one wing to break a head-on deadlock, then releases
 // via spike-frequency adaptation. A nociceptor fires only on a real collision (not mere nearness).
 public sealed class Fly
 {
@@ -24,8 +24,12 @@ public sealed class Fly
     private readonly LifNeuron _sensorR = new() { NoiseSigma = MembraneNoise };
     private readonly LifNeuron _motorL = new() { NoiseSigma = MembraneNoise };
     private readonly LifNeuron _motorR = new() { NoiseSigma = MembraneNoise };
-    private readonly LifNeuron _wallL = new() { NoiseSigma = MembraneNoise };
-    private readonly LifNeuron _wallR = new() { NoiseSigma = MembraneNoise };
+
+    // Touch receptors: contact mechanoreceptors at the antennae. Each fires only while its antenna
+    // is physically touching a wall — zero range, no "how near". Honest replacement for the old
+    // proximity field (Plan 0004). UNCROSSED to the motors (below) so contact turns the fly away.
+    private readonly LifNeuron _touchL = new() { NoiseSigma = MembraneNoise };
+    private readonly LifNeuron _touchR = new() { NoiseSigma = MembraneNoise };
 
     // Nociceptor: a HARM sensor (not "pain" — flies have nociception, but felt suffering is
     // unknown). Fires only on a real ram, never on proximity. The clean "something is wrong" event.
@@ -48,23 +52,23 @@ public sealed class Fly
         _net.Add(_sensorR);
         _net.Add(_motorL);
         _net.Add(_motorR);
-        _net.Add(_wallL);
-        _net.Add(_wallR);
+        _net.Add(_touchL);
+        _net.Add(_touchR);
         _net.Add(_memory);
         _net.Add(_noci);
 
-        // CROSSED smell → motor = SEEKING. UNCROSSED wall → motor = AVOIDING. Both sum.
+        // CROSSED smell → motor = SEEKING. UNCROSSED touch → motor = AVOIDING. Both sum.
         _net.Connect(_sensorL, _motorR, 45.0);
         _net.Connect(_sensorR, _motorL, 45.0);
-        _net.Connect(_wallL, _motorL, 45.0);
-        _net.Connect(_wallR, _motorR, 45.0);
+        _net.Connect(_touchL, _motorL, 45.0);
+        _net.Connect(_touchR, _motorR, 45.0);
 
-        // Self-synapse = the latch. Wall sensors charge it (integration → "I've been stuck").
+        // Self-synapse = the latch. Touch receptors charge it (repeated contact → "I've been stuck").
         _net.Connect(_memory, _memory, MemorySelfWeight);
-        _net.Connect(_wallL, _memory, WallToMemoryWeight);
-        _net.Connect(_wallR, _memory, WallToMemoryWeight);
+        _net.Connect(_touchL, _memory, WallToMemoryWeight);
+        _net.Connect(_touchR, _memory, WallToMemoryWeight);
 
-        // Memory → motor is INHIBITORY: a head-on jam saturates both wheels, so only pulling one
+        // Memory → motor is INHIBITORY: a head-on jam saturates both wings, so only pulling one
         // DOWN out of saturation makes the difference that turns the fly. Negative weight.
         _net.Connect(_memory, _motorR, -MemoryToMotorWeight);
     }
@@ -82,9 +86,9 @@ public sealed class Fly
 
     private double _smellL,
         _smellR,
-        _wallL01,
-        _wallR01,
         _turnSignal; // latest readings, for the viewer
+    private bool _touchedL,
+        _touchedR; // did each antenna touch a wall this step? (for transduction + the viewer)
 
     // ===== Tunables (body + sensors + memory) ===================================================
     private const float AntennaSpread = 0.7f;
@@ -94,7 +98,7 @@ public sealed class Fly
     private const double SensorGain = 40.0;
     private const double MotorTonic = 0.0;
 
-    private const double WallGain = 40.0; // wall-organ sensitivity (lower = less "scared")
+    private const double TouchCurrent = 40.0; // fixed depolarising kick while an antenna is in contact
     private const double NociGain = 60.0; // jolt while actually colliding — a sharp "ouch"
 
     private const double MotorTauMs = 60.0;
@@ -128,14 +132,15 @@ public sealed class Fly
         Vector2 antR = AntennaRight;
         _smellL = world.Smell(antL);
         _smellR = world.Smell(antR);
-        _wallL01 = world.WallProximity(antL);
-        _wallR01 = world.WallProximity(antR);
+        _touchedL = world.Touching(antL);
+        _touchedR = world.Touching(antR);
 
-        // 2. TRANSDUCE world → input currents (sense organs feeding the brain).
+        // 2. TRANSDUCE world → input currents (sense organs feeding the brain). Touch is on/off:
+        //    a fixed current while the antenna is in contact, nothing otherwise — no proximity grade.
         _net.SetInput(_sensorL, SensorTonic + SensorGain * _smellL);
         _net.SetInput(_sensorR, SensorTonic + SensorGain * _smellR);
-        _net.SetInput(_wallL, WallGain * _wallL01);
-        _net.SetInput(_wallR, WallGain * _wallR01);
+        _net.SetInput(_touchL, _touchedL ? TouchCurrent : 0.0);
+        _net.SetInput(_touchR, _touchedR ? TouchCurrent : 0.0);
         _net.SetInput(_motorL, MotorTonic);
         _net.SetInput(_motorR, MotorTonic);
         _net.SetInput(_noci, _colliding ? NociGain : 0.0); // only a real ram, set last step
@@ -172,12 +177,13 @@ public sealed class Fly
             }
         }
 
-        // 4. Activations → wheels → motion. Differential drive: average = forward, difference = turn.
-        float wheelL = (float)Math.Clamp(_actL / ActMax, 0.0, 1.0);
-        float wheelR = (float)Math.Clamp(_actR / ActMax, 0.0, 1.0);
-        float forward = (wheelL + wheelR) * 0.5f * CruiseSpeed;
-        float turn = (wheelL - wheelR) * TurnSpeed; // left wheel faster → yaw right
-        _turnSignal = wheelL - wheelR;
+        // 4. Activations → wings → motion. A fly steers by wingbeat: both wings beating = forward
+        //    thrust (average), one beating harder than the other = yaw (difference).
+        float wingL = (float)Math.Clamp(_actL / ActMax, 0.0, 1.0);
+        float wingR = (float)Math.Clamp(_actR / ActMax, 0.0, 1.0);
+        float forward = (wingL + wingR) * 0.5f * CruiseSpeed;
+        float turn = (wingL - wingR) * TurnSpeed; // left wing beats harder → yaw right
+        _turnSignal = wingL - wingR;
 
         _heading += turn * (float)dtSeconds;
         _pos += Heading(_heading) * forward * (float)dtSeconds;
@@ -196,10 +202,10 @@ public sealed class Fly
 
     public double SmellL => _smellL;
     public double SmellR => _smellR;
-    public double WallL => _wallL01;
-    public double WallR => _wallR01;
-    public double WheelL => Math.Clamp(_actL / ActMax, 0.0, 1.0);
-    public double WheelR => Math.Clamp(_actR / ActMax, 0.0, 1.0);
+    public double TouchL => _touchedL ? 1.0 : 0.0; // 1 = that antenna is touching a wall right now
+    public double TouchR => _touchedR ? 1.0 : 0.0;
+    public double WingL => Math.Clamp(_actL / ActMax, 0.0, 1.0);
+    public double WingR => Math.Clamp(_actR / ActMax, 0.0, 1.0);
     public double MemoryActivity => _actMem / ActMax;
     public double Nociception => _actNoci / ActMax;
     public double TurnSignal => _turnSignal;

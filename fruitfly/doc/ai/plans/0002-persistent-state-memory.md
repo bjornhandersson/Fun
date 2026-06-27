@@ -1,7 +1,7 @@
 # Plan 0002 — Persistent internal state (the first slice of "brain")
 
 **Status:** Working — the memory is built in isolation (Play 5b: poke → integrate → hold →
-release) **and** wired into the fly (Play 6b): a stuck fly latches "I'm stuck" and breaks free
+release) **and** wired into the fly (Play 6): a stuck fly latches "I'm stuck" and breaks free
 on its own via a committed, self-held turn. Remaining: clean up the banana-in-corner overlap and
 backfill `notes/` + FOUNDATIONS.
 **Goal:** Give the fly its first piece of **working memory** — an interneuron whose activity

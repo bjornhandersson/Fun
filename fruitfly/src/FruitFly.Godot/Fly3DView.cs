@@ -17,10 +17,14 @@ public partial class Fly3DView : Node3D
     private MeshInstance3D _banana = null!,
         _bananaGlow = null!;
     private Node3D _flyBody = null!; // we MOVE and TURN this; wings + antennae hang off it
-    private MeshInstance3D _wingL = null!,
-        _wingR = null!,
-        _antL = null!,
+    private Node3D _wingHingeL = null!,
+        _wingHingeR = null!; // pivots at the shoulders: swept back, and they beat about this hinge
+    private MeshInstance3D _antL = null!,
         _antR = null!;
+
+    private const float WingSweep = 0.7f; // radians the wing is swept BACK over the abdomen (vs straight out)
+    private const float WingRaise = 0.25f; // resting upward tilt
+    private const float WingAmp = 0.95f; // beat amplitude — big, so it sweeps up over the back like a fly
     private MeshInstance3D _shadow = null!,
         _dropline = null!,
         _trail = null!;
@@ -123,35 +127,56 @@ public partial class Fly3DView : Node3D
         _flyBody = new Node3D();
         AddChild(_flyBody);
 
-        // Body: a little box whose LONG axis is -Z, so "forward" = -Z (what LookAt points at a target).
-        _flyBody.AddChild(new MeshInstance3D
-        {
-            Mesh = new BoxMesh { Size = new Vector3(0.3f, 0.25f, 0.7f) },
-            MaterialOverride = Flat(new Color(0.9f, 0.9f, 0.95f)),
-        });
+        // A dumb little brown fruit fly. Forward is -Z (LookAt points -Z at the target), so the head
+        // and big red eyes sit toward -Z and the fat abdomen trails at +Z. Lumpy squashed spheres.
+        Color brown = new(0.32f, 0.21f, 0.10f);
+        Color darkBrown = new(0.19f, 0.12f, 0.05f);
+        AddPart(new Vector3(0f, 0.02f, 0.18f), new Vector3(0.17f, 0.15f, 0.30f), darkBrown); // abdomen
+        AddPart(new Vector3(0f, 0.04f, -0.06f), new Vector3(0.16f, 0.16f, 0.18f), brown); // thorax hump
+        AddPart(new Vector3(0f, 0.04f, -0.22f), new Vector3(0.11f, 0.11f, 0.11f), brown); // little head
+        AddPart(new Vector3(-0.08f, 0.06f, -0.24f), new Vector3(0.08f, 0.09f, 0.08f), default, eye: true);
+        AddPart(new Vector3(0.08f, 0.06f, -0.24f), new Vector3(0.08f, 0.09f, 0.08f), default, eye: true);
 
-        // Wings, rolled by the wingbeat phase so they flap — the same beat that makes the lift.
-        _wingL = Wing(-1);
-        _wingR = Wing(+1);
-        _flyBody.AddChild(_wingL);
-        _flyBody.AddChild(_wingR);
+        // Wings: hinged at the shoulders, swept BACK over the abdomen. They beat about the hinge.
+        _wingHingeL = WingHinge(-1);
+        _wingHingeR = WingHinge(+1);
+        _flyBody.AddChild(_wingHingeL);
+        _flyBody.AddChild(_wingHingeR);
 
-        // Antennae out front: small balls that FLARE RED while an antenna touches a wall (the fly
+        // Antennae out front: tiny stubs that FLARE RED while an antenna touches a wall (the fly
         // is sensing the world). They sit in world space, so they're children of the scene, not the
         // body — we place them each frame from _fly.AntennaLeft/Right.
-        _antL = new MeshInstance3D { Mesh = new SphereMesh { Radius = 0.13f, Height = 0.26f } };
-        _antR = new MeshInstance3D { Mesh = new SphereMesh { Radius = 0.13f, Height = 0.26f } };
+        _antL = new MeshInstance3D { Mesh = new SphereMesh { Radius = 0.07f, Height = 0.14f } };
+        _antR = new MeshInstance3D { Mesh = new SphereMesh { Radius = 0.07f, Height = 0.14f } };
         AddChild(_antL);
         AddChild(_antR);
     }
 
-    private MeshInstance3D Wing(int side) =>
-        new()
+    // One squashed-sphere body part (scale = its three semi-axes). eye:true = a glossy red bug eye.
+    private void AddPart(Vector3 pos, Vector3 semi, Color color, bool eye = false) =>
+        _flyBody.AddChild(new MeshInstance3D
         {
-            Mesh = new BoxMesh { Size = new Vector3(0.6f, 0.04f, 0.35f) },
-            Position = new Vector3(side * 0.45f, 0.1f, 0f),
-            MaterialOverride = Flat(new Color(0.6f, 0.85f, 1f, 0.7f)),
-        };
+            Mesh = new SphereMesh { Radius = 1f, Height = 2f },
+            Position = pos,
+            Scale = semi,
+            MaterialOverride = eye ? Glow(new Color(0.65f, 0.06f, 0.05f)) : Flat(color),
+        });
+
+    // A wing hinge: a pivot at the shoulder, swept back, with a long narrow membrane extending out
+    // from it. The beat (set each frame) rotates the WHOLE hinge up/down — so the wing sweeps from
+    // the hinge like a real fly's, not like a fixed airplane wing pinned at its middle.
+    private Node3D WingHinge(int side)
+    {
+        var hinge = new Node3D { Position = new Vector3(side * 0.07f, 0.13f, -0.02f) };
+        hinge.AddChild(new MeshInstance3D
+        {
+            // Long + narrow, tapering back; offset OUT and slightly BACK along the hinge's local axis.
+            Mesh = new BoxMesh { Size = new Vector3(0.6f, 0.012f, 0.16f) },
+            Position = new Vector3(side * 0.34f, 0f, 0.12f),
+            MaterialOverride = Flat(new Color(0.82f, 0.84f, 0.9f, 0.30f)),
+        });
+        return hinge;
+    }
 
     private void BuildAltitudeCues()
     {
@@ -254,9 +279,11 @@ public partial class Fly3DView : Node3D
         _flyBody.LookAt(flyPos + forward, Vector3.Up);
 
         // Flap the wings with the real beat phase.
-        float tilt = Mathf.Clamp((float)_fly.WingbeatPhase, -1f, 1f) * 0.7f;
-        _wingL.Rotation = new Vector3(0f, 0f, tilt);
-        _wingR.Rotation = new Vector3(0f, 0f, -tilt);
+        // Beat: each hinge keeps its swept-back Y, and rolls up/down (Z) by the wingbeat phase.
+        // Mirrored sign so both wings beat together, sweeping up over the back.
+        float beat = WingRaise + Mathf.Clamp((float)_fly.WingbeatPhase, -1f, 1f) * WingAmp;
+        _wingHingeL.Rotation = new Vector3(0f, WingSweep, beat);
+        _wingHingeR.Rotation = new Vector3(0f, -WingSweep, -beat);
 
         // Antennae at their world spots, flaring red on contact (the fly sensing the wall).
         PlaceAntenna(_antL, _fly.AntennaLeft, alt, _fly.TouchL > 0.5);
@@ -271,7 +298,7 @@ public partial class Fly3DView : Node3D
     private void PlaceAntenna(MeshInstance3D ant, NVec at, float alt, bool touching)
     {
         ant.Position = Map(at.X, at.Y, alt);
-        ant.MaterialOverride = touching ? Glow(new Color(1f, 0.25f, 0.1f)) : Flat(Colors.SkyBlue);
+        ant.MaterialOverride = touching ? Glow(new Color(1f, 0.25f, 0.1f)) : Flat(new Color(0.4f, 0.3f, 0.15f));
     }
 
     private void UpdateAltitudeCues(Vector3 flyPos, float alt)

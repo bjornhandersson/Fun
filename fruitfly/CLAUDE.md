@@ -70,9 +70,14 @@ a self-sustaining loop, a memory neuron in isolation, the assembled Braitenberg 
 stuck to break free — a **wingbeat CPG** (Play 7): two neurons that generate their own rhythm
 (mutual inhibition + fatigue); and a **hover** (Play 8, 2.5D): a body with mass + gravity whose
 wingbeat makes lift, held aloft by a neural reflex (sense dropping → beat harder) — shove it and it
-recovers. The last two are the first steps toward neural flight. All behaviour **emerges from
-wiring** — no view lets the engine make a decision. (Earlier redundant fly demos — a memoryless fly
-and a two-flies population view — were removed once 6 superseded them.)
+recovers; and the **united fly in 3D** (Play 9, Plan 0009): the Play-6 horizontal brain composed with
+the wingbeat altitude layer into ONE creature that flies through 3D space — it nails the banana's
+height every trial, though reliable *eating* still waits on a horizontal-orbit fix (documented RED in
+`Fly3DHeadlessCheck`). The last few are the first steps toward neural flight. All behaviour **emerges
+from wiring** — no view lets the engine make a decision. (The 3D wings are a faithful *readout* of the
+real neural wingbeat, not an aerodynamic sim; lift is vigour×gain, not wing forces — see Plan 0009.)
+(Earlier redundant fly demos — a memoryless fly and a two-flies population view — were removed once 6
+superseded them.)
 See [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
 
 ## AI structure

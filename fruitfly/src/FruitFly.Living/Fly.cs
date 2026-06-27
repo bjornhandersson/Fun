@@ -118,7 +118,9 @@ public sealed class Fly
     private const float TurnSpeed = 3.2f; // rad/sec at full activation difference
 
     private const double MemorySelfWeight = 60.0; // the latch
-    private const double MemAdaptKick = 0.6; // fatigue per spike → the release
+    private const double MemAdaptKick = 0.30; // fatigue per spike → the release. LOWER = longer hold:
+    // the brake builds slower, so the self-exciting latch keeps firing longer (~1.2s vs ~0.75s at 0.6,
+    // measured in isolation). Below ~0.2 the brake never wins → permanent latch, so 0.30 keeps margin.
     private const double MemAdaptTau = 400.0; // ms; how long fatigue lingers (hold + recovery)
     private const double WallToMemoryWeight = 25.0; // sustained wall contact charges the memory
     private const double MemoryToMotorWeight = 60.0; // inhibitory committed-turn strength

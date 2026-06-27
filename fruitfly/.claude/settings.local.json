@@ -15,7 +15,12 @@
       "Bash(timeout 180 dotnet build FruitFly.Godot.sln -v quiet)",
       "Bash(rm -f probe.csx)",
       "Bash(cp /Users/bjornandersson/dev/private/fruitfly/src/FruitFly.Core/*.cs .)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Read(//Applications/**)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(\"/Applications/Godot_mono.app/Contents/MacOS/Godot\" --path . res://Fly3DView.tscn)",
+      "Bash(echo \"launched pid $!\")",
+      "Read(//tmp/**)"
     ]
   }
 }

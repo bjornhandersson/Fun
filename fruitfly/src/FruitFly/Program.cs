@@ -13,6 +13,10 @@ internal static class Program
         FlyHeadlessCheck.Run();
         Console.WriteLine();
 
+        // Plan 0009: the united 2.5D fly flies to the banana in X/Y AND height.
+        Fly3DHeadlessCheck.Run();
+        Console.WriteLine();
+
         // Rung 1 of the flight roadmap: two neurons making their own rhythm (Plan 0007).
         HalfCentreOscillatorCheck.Run();
         Console.WriteLine();

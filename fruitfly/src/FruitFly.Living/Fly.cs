@@ -43,10 +43,19 @@ public sealed class Fly
         TauAdapt = MemAdaptTau,
     };
 
-    public Fly(Vector2 start, float heading = 0f)
+    // In 3D mode the fly also owns a vertical layer (Plan 0009): a FlyingBody that beats to make
+    // lift, holds altitude, and climbs the banana's smell to its HEIGHT. Null in 2D mode (Play 6),
+    // so the proven horizontal fly is completely unchanged.
+    private readonly FlyingBody? _vertical;
+
+    public Fly(Vector2 start, float heading = 0f, bool fly3D = false)
     {
         _pos = start;
         _heading = heading;
+        if (fly3D)
+        {
+            _vertical = new FlyingBody(startAltitude: 300.0, reflex: true);
+        }
 
         _net.Add(_sensorL);
         _net.Add(_sensorR);
@@ -189,9 +198,27 @@ public sealed class Fly
         _pos += Heading(_heading) * forward * (float)dtSeconds;
 
         // 5. Keep inside the world; a clamp that moved us = a real collision (drives nociception
-        //    next step). 6. Eat the banana if we reached it.
+        //    next step).
         _pos = world.Clamp(_pos, out _colliding);
-        world.TryEat(_pos);
+
+        // 6. VERTICAL layer (3D mode): beat to make lift, hold altitude, and climb the banana's smell
+        //    to its height. Independent of the horizontal seeking above (the 2.5D simplification —
+        //    forward thrust is still the wheels-abstraction; lift is the honest wingbeat).
+        if (_vertical != null)
+        {
+            _vertical.SeekAltitude(world.BananaHeight);
+            _vertical.Step(dtSeconds);
+        }
+
+        // 7. Eat the banana — in 3D it must be reached in X/Y AND in height.
+        if (_vertical != null)
+        {
+            world.TryEat(_pos, _vertical.Altitude);
+        }
+        else
+        {
+            world.TryEat(_pos);
+        }
     }
 
     // ===== Read-only state for viewers ==========================================================
@@ -210,6 +237,13 @@ public sealed class Fly
     public double Nociception => _actNoci / ActMax;
     public double TurnSignal => _turnSignal;
     public bool Colliding => _colliding;
+
+    // Vertical layer (3D mode); harmless zeros in 2D mode.
+    public bool Flies3D => _vertical != null;
+    public double Altitude => _vertical?.Altitude ?? 0.0;
+    public double VerticalVelocity => _vertical?.VerticalVelocity ?? 0.0;
+    public double BeatVigor => _vertical?.BeatVigor ?? 0.0;
+    public double WingbeatPhase => _vertical?.WingPhase ?? 0.0;
 
     private static Vector2 Heading(float angle) => new(MathF.Cos(angle), MathF.Sin(angle));
 }

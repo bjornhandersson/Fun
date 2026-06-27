@@ -15,19 +15,28 @@ public sealed class World
 
     private const double SmellStrength = 1.0; // concentration at the banana itself
     private const double SmellFalloff = 420.0; // px at which smell halves — big, reaches across the field
-    private const float EatRadius = 42f; // within this the banana is eaten and respawns
+    private const float EatRadius = 42f; // within this (in X/Y) the banana is eaten and respawns
     private const float CornerInset = 90f; // how far in from a corner a (re)spawned banana sits
+
+    // The banana also hangs at a HEIGHT (Plan 0009, 2.5D): the fly must climb to it, not just reach
+    // its X/Y. Height is a separate axis from the X/Y play-field; it respawns randomly in this band.
+    private const float BananaMinHeight = 120f,
+        BananaMaxHeight = 480f;
+    private const float EatHeightBand = 90f; // how close in height counts as "at the banana" (it hangs
+    // with real vertical size; the fly's altitude wanders a little as it orbits, so be forgiving)
 
     private readonly Random _rng;
 
     public Vector2 Size { get; }
     public Vector2 Banana { get; private set; }
+    public float BananaHeight { get; private set; }
 
     public World(Vector2 size, Random? rng = null)
     {
         _rng = rng ?? new Random();
         Size = size;
         Banana = new Vector2(size.X - CornerInset, CornerInset); // start in a corner (top-right)
+        BananaHeight = (BananaMinHeight + BananaMaxHeight) * 0.5f; // start mid-height
     }
 
     // Smooth odor field: 1 at the banana, halving every SmellFalloff, never quite 0.
@@ -65,16 +74,34 @@ public sealed class World
         return clamped;
     }
 
-    // If `pos` is on the banana, eat it (respawn in a fresh random corner) and return true.
+    // 2D eat (Play 6): on the banana in X/Y → eat and respawn. Height is ignored.
     public bool TryEat(Vector2 pos)
     {
         if (Vector2.Distance(pos, Banana) >= EatRadius)
         {
             return false;
         }
+        Respawn();
+        return true;
+    }
+
+    // 3D eat (Plan 0009): must be close in X/Y AND at the banana's height to eat it.
+    public bool TryEat(Vector2 pos, double altitude)
+    {
+        if (Vector2.Distance(pos, Banana) >= EatRadius || Math.Abs(altitude - BananaHeight) >= EatHeightBand)
+        {
+            return false;
+        }
+        Respawn();
+        return true;
+    }
+
+    // Move the banana to a fresh random corner AND a fresh random height.
+    private void Respawn()
+    {
         float x = _rng.NextDouble() < 0.5 ? CornerInset : Size.X - CornerInset;
         float y = _rng.NextDouble() < 0.5 ? CornerInset : Size.Y - CornerInset;
         Banana = new Vector2(x, y);
-        return true;
+        BananaHeight = BananaMinHeight + (float)_rng.NextDouble() * (BananaMaxHeight - BananaMinHeight);
     }
 }

@@ -9,6 +9,10 @@ internal static class Program
 
     private static void Main()
     {
+        // Headless proof that the assembled fly runs and behaves without Godot (ADR 0005).
+        FlyHeadlessCheck.Run();
+        Console.WriteLine();
+
         // Two neurons wired in a line: A drives B through one synapse.
         var a = new LifNeuron();
         var b = new LifNeuron();

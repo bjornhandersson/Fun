@@ -84,8 +84,10 @@ Built **bottom-up**: the substrate is spiking neurons + synapses, and behavior i
 to **emerge from wiring** rather than be scripted ("assembly for an 8-bit chip, but for a
 fruit fly"). Neuron model is **Leaky Integrate-and-Fire (LIF)**; the first circuit will be
 a **Braitenberg vehicle**. Language is **C#**; visualization is **Godot (C#)**, brought
-forward now (ADR 0004) with the brain kept in a Godot-free `FruitFly.Core` library that
-Godot references — the eventual goal being a live dual-view (world + brain). The engine is
+forward now (ADR 0004) with the brain kept in a Godot-free `FruitFly.Core` library, and the
+assembled creatures (flies + their worlds) in a Godot-free `FruitFly.Living` library (ADR 0005);
+Godot, the console, and tests are all *viewers* that reference them — the eventual goal being a
+live dual-view (world + brain). The engine is
 data-oriented so it can scale to the real connectome
 (~140k neurons), though small hand-wired circuits come first.
 
@@ -98,7 +100,8 @@ Task-level plans live in `plans/`. One plan per task/milestone.
 | Plan | Status | Summary |
 |------|--------|---------|
 | [0001 — Milestone 0: LIF neuron](plans/0001-milestone-0-lif-neuron.md) | In progress | Single LIF neuron + synapse + 3-neuron chain; voltage trace. Get the math right before any engine. |
-| [0002 — Persistent internal state (memory)](plans/0002-persistent-state-memory.md) | Planned | First slice of "brain": a self-sustaining interneuron that gives the fly memory of being stuck, so it breaks free on its own. Reflex → history-dependent behavior. |
+| [0002 — Persistent internal state (memory)](plans/0002-persistent-state-memory.md) | Working | First slice of "brain": a self-sustaining interneuron + spike-frequency adaptation gives the fly memory of being stuck, so it breaks free on its own. Built in isolation (5b) and in the fly (6b). |
+| [0003 — Extract creatures into `FruitFly.Living`](plans/0003-extract-creatures-into-living.md) | Fly done | The memory fly is extracted into Godot-free `FruitFly.Living` (Fly + World); the Godot view is a pure viewer; a headless console check asserts the wall-escape. Remaining: migrate the gallery circuits. |
 
 _Several circuits (Braitenberg seeking, summation, inhibition, self-sustaining loop, the
 ~300k-neuron flies) were built **without** their own plans — a documentation gap to backfill.
@@ -115,3 +118,4 @@ Architecture Decision Records live in `../adr/`. See [`../adr/README.md`](../adr
 | [0002](../adr/0002-bottom-up-spiking-neurons.md) | Bottom-up spiking neurons (emergent), not a top-down state machine |
 | [0003](../adr/0003-leaky-integrate-and-fire.md) | Use the Leaky Integrate-and-Fire neuron model |
 | [0004](../adr/0004-godot-for-visualization.md) | Use Godot (C#) for visualization, brought forward now; brain stays in `FruitFly.Core` |
+| [0005](../adr/0005-creatures-in-fruitfly-living.md) | Assembled creatures live in a Godot-free `FruitFly.Living` library; Godot is strictly a viewer |

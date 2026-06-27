@@ -8,9 +8,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- The GUI references the Godot-free brain. (Godot strips this when it regenerates the
-       csproj; if the project ever loses sight of LifNeuron, re-check that this line is here.) -->
+  <!-- The GUI references the Godot-free brain (Core) and creatures (Living). (Godot strips these
+       when it regenerates the csproj; if the project ever loses sight of LifNeuron or Fly,
+       re-check that these lines are here.) -->
   <ItemGroup>
     <ProjectReference Include="..\FruitFly.Core\FruitFly.Core.csproj" />
+    <ProjectReference Include="..\FruitFly.Living\FruitFly.Living.csproj" />
   </ItemGroup>
 </Project>

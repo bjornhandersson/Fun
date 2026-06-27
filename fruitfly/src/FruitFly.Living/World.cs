@@ -74,34 +74,37 @@ public sealed class World
         return clamped;
     }
 
-    // 2D eat (Play 6): on the banana in X/Y → eat and respawn. Height is ignored.
+    // 2D eat (Play 6): on the banana in X/Y → eat and respawn. Height is ignored — a 2D world has
+    // no height axis, so this path draws NO height (it must leave the RNG stream byte-for-byte as it
+    // was before Plan 0009, or Play 6's deterministic seed would shift).
     public bool TryEat(Vector2 pos)
     {
         if (Vector2.Distance(pos, Banana) >= EatRadius)
         {
             return false;
         }
-        Respawn();
+        RespawnXY();
         return true;
     }
 
-    // 3D eat (Plan 0009): must be close in X/Y AND at the banana's height to eat it.
+    // 3D eat (Plan 0009): must be close in X/Y AND at the banana's height to eat it. Respawns the
+    // plane position AND a fresh height.
     public bool TryEat(Vector2 pos, double altitude)
     {
         if (Vector2.Distance(pos, Banana) >= EatRadius || Math.Abs(altitude - BananaHeight) >= EatHeightBand)
         {
             return false;
         }
-        Respawn();
+        RespawnXY();
+        BananaHeight = BananaMinHeight + (float)_rng.NextDouble() * (BananaMaxHeight - BananaMinHeight);
         return true;
     }
 
-    // Move the banana to a fresh random corner AND a fresh random height.
-    private void Respawn()
+    // Move the banana to a fresh random corner in the X/Y plane (the height, if any, is the caller's).
+    private void RespawnXY()
     {
         float x = _rng.NextDouble() < 0.5 ? CornerInset : Size.X - CornerInset;
         float y = _rng.NextDouble() < 0.5 ? CornerInset : Size.Y - CornerInset;
         Banana = new Vector2(x, y);
-        BananaHeight = BananaMinHeight + (float)_rng.NextDouble() * (BananaMaxHeight - BananaMinHeight);
     }
 }

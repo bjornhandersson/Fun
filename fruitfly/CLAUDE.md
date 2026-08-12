@@ -80,6 +80,18 @@ real neural wingbeat, not an aerodynamic sim; lift is vigour×gain, not wing for
 superseded them.)
 See [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
 
+## How to run things
+
+- **Godot app** (the gallery / plays) — there is no `godot` on PATH; launch the Mono build
+  directly, in the background so the session isn't blocked:
+  ```
+  /Applications/Godot_mono.app/Contents/MacOS/Godot --path src/FruitFly.Godot
+  ```
+- **Headless checks** (console app, `src/FruitFly/Program.cs`):
+  ```
+  dotnet run --project src/FruitFly
+  ```
+
 ## AI structure
 
 - `CLAUDE.md` (this file) — short operational entry point.

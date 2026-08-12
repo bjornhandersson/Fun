@@ -31,7 +31,8 @@ public sealed class FlyingBody
     private const double NeuralStepMs = 1.0; // stable substep for the brain
 
     // --- the reflex ---
-    private const double BaselineCommand = 25.0; // steady "fly" command — wings sized to the body
+    // (The baseline "fly" command is gone — it's now the wingbeat's own pacemaker command neuron,
+    //  Plan 0010. What's left here is only the sensory-CAUSED correction that rides on top.)
     private const double SenseGain = 0.65; // vertical speed (px/s) → receptor input current (sensitive
     // enough that it keeps correcting down to a gentle drift, not just fast falls)
     private const double CmdGain = 45.0; // how hard the reflex pushes the beat per unit of sensed motion
@@ -120,9 +121,10 @@ public sealed class FlyingBody
             }
 
             // 3. REFLEX: dropping → beat harder, rising → ease off (the hover). Plus the climb bias.
+            //    This is MODULATION only — the baseline drive is the wingbeat's own command neuron.
             double hover = _reflex ? CmdGain * (_descAct - _ascAct) : 0.0;
-            _command = BaselineCommand + hover + climb;
-            _wingbeat.SetCommand(_command);
+            _command = hover + climb;
+            _wingbeat.SetModulation(_command);
 
             // 3. Beat, and gather the vigour the lift comes from.
             _wingbeat.Step(NeuralStepMs);

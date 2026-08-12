@@ -1,3 +1,5 @@
+using FruitFly.Living;
+
 namespace FruitFly;
 
 // Plan 0010, step 1 — ISOLATION PROOF that a COMMAND neuron can fire on its OWN, with no input.
@@ -43,5 +45,24 @@ internal static class PacemakerCheck
         Console.WriteLine(
             $"[pacemaker]  command neuron, ZERO input, {steps} ms  ->  {spikes} spikes  =>  {verdict}"
         );
+
+        // The command neuron must drive the CPG to the SAME baseline vigour the old constant did —
+        // ~0.204, the value LiftGain was built around — so the hover equilibrium is unchanged. This
+        // guards the calibration of CommandWeight against future drift.
+        var cpg = new HalfCentreOscillator();
+        double vigorSum = 0.0;
+        const int warm = 200,
+            measure = 800;
+        for (int t = 0; t < warm + measure; t++)
+        {
+            cpg.Step(dt); // SetModulation never called ⇒ pure baseline drive (modulation = 0)
+            if (t >= warm)
+            {
+                vigorSum += cpg.LeftActivity + cpg.RightActivity;
+            }
+        }
+        double vigor = vigorSum / measure;
+        string vVerdict = Math.Abs(vigor - 0.204) < 0.02 ? "PASS" : "FAIL — recalibrate CommandWeight";
+        Console.WriteLine($"[pacemaker]  baseline CPG vigour = {vigor:0.000}  (target ~0.204)  =>  {vVerdict}");
     }
 }

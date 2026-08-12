@@ -17,13 +17,22 @@ namespace FruitFly.Living;
 public sealed class HalfCentreOscillator
 {
     // --- The forces that make it oscillate (the values proven in HalfCentreOscillatorCheck) ---
-    private const double Drive = 25.0; // steady "command to fly" into both cells (rheobase ~15)
     private const double Inhib = 40.0; // cross-inhibition: the winner silences the loser
     private const double AdaptKick = 1.0; // fatigue per spike: how fast the winner tires (the tempo)
     private const double AdaptTau = 120.0; // ms; how slowly fatigue fades (how long a turn lasts)
     private const double Noise = 1.0; // membrane jitter: breaks the symmetric tie so SOMEONE leads
 
+    // The "command to fly" is a real NEURON now, not an injected constant (Plan 0010). A PACEMAKER:
+    // its rest sits ABOVE its own threshold, so it fires on its own with NO input — an endogenous
+    // flight drive (proven in isolation by PacemakerCheck). Its spikes drive BOTH wing cells through
+    // synapses, so the drive lives in the graph as a firing CAUSE you can gate or fatigue — not as a
+    // number the world pushes into the effectors.
+    private const double CommandRestMv = -40.0; // 10 mV above threshold ⇒ self-firing pacemaker
+    private const double CommandWeight = 52.0; // command→wing synapse; sized so baseline vigour ≈ 0.204 (the
+    // value LiftGain was built around) — the honest "wings sized to the body", as synapse strength
+
     private readonly Network _net = new();
+    private readonly LifNeuron _command = new() { VRest = CommandRestMv };
     private readonly LifNeuron _l = new()
     {
         NoiseSigma = Noise,
@@ -46,21 +55,26 @@ public sealed class HalfCentreOscillator
 
     public HalfCentreOscillator()
     {
+        _net.Add(_command);
         _net.Add(_l);
         _net.Add(_r);
+        _net.Connect(_command, _l, CommandWeight); // the endogenous flight drive into both wings...
+        _net.Connect(_command, _r, CommandWeight); // ...equally; the L/R asymmetry comes from below
         _net.Connect(_l, _r, -Inhib); // L firing pushes R DOWN (negative weight = inhibitory)
         _net.Connect(_r, _l, -Inhib); // R firing pushes L DOWN — the mutual half of the inhibition
 
-        SetCommand(Drive); // start at the default steady command
+        // No injected baseline: the command neuron IS the drive. External input starts at 0.
     }
 
-    // Set the "command to fly" driving both cells. The isolation demo (Play 7) leaves it at the
-    // default Drive; a reflex (Plan 0008) calls this each tick to beat HARDER or softer — more
-    // command ⇒ faster firing ⇒ more vigour ⇒ more lift.
-    public void SetCommand(double drive)
+    // MODULATE the beat: extra current onto both wing cells, ON TOP of the endogenous command drive.
+    // 0 = the pure baseline beat (Play 7 isolation leaves it here). A reflex (Plan 0008/0009) sets
+    // this each tick from real receptors: positive ⇒ beat HARDER (more vigour ⇒ more lift), negative
+    // ⇒ ease off. This is a sensory-CAUSED correction — honest external input — and the uncaused
+    // baseline it used to ride on is gone.
+    public void SetModulation(double current)
     {
-        _net.SetInput(_l, drive);
-        _net.SetInput(_r, drive);
+        _net.SetInput(_l, current);
+        _net.SetInput(_r, current);
     }
 
     // Advance the circuit by one tick of dtMs and fold the new spikes into the activity outputs.

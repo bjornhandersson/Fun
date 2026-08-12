@@ -1,6 +1,8 @@
 # Plan 0010 — Neuralize the flight command (kill the magic baseline)
 
-**Status:** In progress. Step 1 (isolation proof) building.
+**Status:** Done (steps 1–3). The uncaused flight baseline is gone — the beat is driven by a real
+pacemaker command neuron. Behaviour matches the old suite (hover ~209px, alt-seek up+down, CPG
+oscillates); only the pre-existing 3D orbit RED remains, untouched. Docs step (4) pending.
 
 ## Why
 
@@ -29,13 +31,13 @@ the real gain.
 
 ## Steps (tiny, assistant writes one at a time)
 
-- [ ] **1. Isolation proof** — `PacemakerCheck`: a lone neuron with `VRest = -40` fires on its own
-      with `I = 0`. Prove endogenous activity before wiring anything.
-- [ ] **2. CPG drive** — add the command neuron to `HalfCentreOscillator`, synapse it → both L/R,
-      delete the constant `Drive`. Verify Play 7 still oscillates (same tempo band).
-- [ ] **3. Flight modulation** — in `FlyingBody`, the hover/climb reflexes (already sensory-caused)
-      become excitation/inhibition *on top of* the command neuron; delete `BaselineCommand`.
-      Verify the hover still emerges and it still climbs to the banana's height.
+- [x] **1. Isolation proof** — `PacemakerCheck`: a lone neuron with `VRest = -40` fires on its own
+      with `I = 0`. Proven: ~90 Hz, first spike at 8 ms, zero input.
+- [x] **2. CPG drive** — command neuron added to `HalfCentreOscillator`, synapsed → both L/R
+      (`CommandWeight = 52`, calibrated so baseline vigour ≈ 0.204), constant `Drive` deleted.
+      Play 7 still oscillates. `SetCommand` → `SetModulation` (extra current on top, default 0).
+- [x] **3. Flight modulation** — `FlyingBody.BaselineCommand` deleted; the hover/climb reflexes
+      (sensory-caused) now feed `SetModulation` only. Hover holds ~209px; alt-seek up+down PASS.
 - [ ] **4. Docs** — update FOUNDATIONS index, [[0007]], [[0008]], [[0009]] to point here.
 
 ## Out of scope (named, not fixed here)

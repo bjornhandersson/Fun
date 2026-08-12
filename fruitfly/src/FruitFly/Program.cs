@@ -9,6 +9,10 @@ internal static class Program
 
     private static void Main()
     {
+        // Plan 0010 step 1: a command neuron that fires on its OWN — the honest flight drive.
+        PacemakerCheck.Run();
+        Console.WriteLine();
+
         // Headless proof that the assembled fly runs and behaves without Godot (ADR 0005).
         FlyHeadlessCheck.Run();
         Console.WriteLine();

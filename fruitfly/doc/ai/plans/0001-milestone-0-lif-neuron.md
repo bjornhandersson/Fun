@@ -42,11 +42,14 @@ Plus the discontinuous rule: `if V ≥ V_threshold: spike; V = V_reset`.
   - [x] Part 2: `Step(I, dt)` — the update line + threshold/reset.
   - [x] Part 3: a `Program` driver that feeds constant `I` and prints a voltage trace.
 - [x] Run it — confirmed: under constant `I` it charges and fires periodically (the sawtooth).
-- [~] Add a `Synapse` (on source spike, add weight to target's input).
+- [x] Add a `Synapse` (on source spike, add weight to target's input).
   - [x] Part 1: the `Synapse` type — source, target, weight, and `Current(sourceFired)`
     (the spike-event → current adapter). Simplest model: same-step, one-step kick.
-- [ ] Wire a 3-neuron chain (input → middle → output).
-- [ ] Emit a voltage trace (CSV or ASCII) and eyeball the dynamics.
+- [x] Wire a 2-neuron chain (A driven by constant input → B through one synapse) and
+  render dual ASCII voltage panels — confirmed: A fires periodically and each A-spike
+  drives B over threshold.
+- [ ] Extend to a 3-neuron chain (input → middle → output).
+- [ ] Emit a voltage trace (CSV or ASCII) and eyeball the dynamics across all three.
 
 ## Deferred (start simple; add when a circuit needs it)
 

@@ -1,0 +1,18 @@
+<Project Sdk="Godot.NET.Sdk/4.7.0">
+  <PropertyGroup>
+    <!-- net10.0 to match Core/console and the only runtime installed on this machine.
+         Godot's template defaults this to net8.0; we override it deliberately. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Godot loads the game assembly dynamically; this emits it in the form it expects. -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- The GUI references the Godot-free brain (Core) and creatures (Living). (Godot strips these
+       when it regenerates the csproj; if the project ever loses sight of LifNeuron or Fly,
+       re-check that these lines are here.) -->
+  <ItemGroup>
+    <ProjectReference Include="..\FruitFly.Core\FruitFly.Core.csproj" />
+    <ProjectReference Include="..\FruitFly.Living\FruitFly.Living.csproj" />
+  </ItemGroup>
+</Project>

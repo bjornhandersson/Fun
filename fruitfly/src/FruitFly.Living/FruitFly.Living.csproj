@@ -1,15 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- The CREATURES: assembled flies + the worlds they live in. Godot-free (BCL only),
+       references the substrate. A class library so any viewer — Godot, the console, tests —
+       can drive the same fly. See ADR 0005. -->
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- The console app is just one viewer of the brain. It references the Core library
-       rather than owning the neuron code, so the math has a single home. -->
   <ItemGroup>
     <ProjectReference Include="..\FruitFly.Core\FruitFly.Core.csproj" />
-    <ProjectReference Include="..\FruitFly.Living\FruitFly.Living.csproj" />
   </ItemGroup>
 </Project>

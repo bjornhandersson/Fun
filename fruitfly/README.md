@@ -42,14 +42,17 @@ then one small, fully-explained piece of code at a time. (See
 
 ## Current status
 
-Early days — the substrate is taking shape:
+The substrate works, and the first circuits are wired and running:
 
 - ✅ A single **LIF neuron** that charges, fires, and resets (a periodic spike train).
-- ✅ A **synapse** connecting two neurons — one neuron's spikes now drive another.
-- ⏭️ Next: a small chain of neurons, then the first real circuit.
+- ✅ A **synapse** connecting two neurons — one neuron's spikes drive another.
+- ✅ Multi-neuron circuits: a **chain**, **summation**, **inhibition**, and a self-sustaining **loop**.
+- ✅ The first real circuit — a **Braitenberg fruit fly** that seeks a banana and avoids walls, both behaviours *emerging* from cross- and uncross-wired neurons.
+- ✅ Scaled to **populations**: two flies of ~300,000 LIF neurons each, steered purely by population firing rates.
 
-It runs as a plain C# console program that draws the neurons' voltages as a live ASCII
-trace (`'*'` = voltage, `'|'` = firing threshold):
+The early circuits run as a plain C# console viewer that draws the neurons' voltages as a
+live ASCII trace (`'*'` = voltage, `'|'` = firing threshold); the full gallery above is
+explored interactively in a Godot viewer:
 
 ```
    A (driven by constant input)        B (fed by A through the synapse)

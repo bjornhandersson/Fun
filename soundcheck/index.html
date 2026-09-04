@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16130f">
+<meta name="description" content="Soundcheck plays the same synthesized reference signals into every pair of headphones you own and turns what you hear into numbers you can compare. No app, no downloads, no reviews.">
+<title>Soundcheck — compare headphones with your own ears</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16130f; --al: #241f19; --al-2: #1e1a15; --al-line: #0f0d0a; --al-hi: rgba(255,255,255,.07);
+    --ink: #e6ded2; --muted: #a39a8b; --dim: #6f675b; --text: #e6ded2; --text-dim: #a39a8b;
+    --lcd: #0f0d0a; --amber: #d8a15c; --amber-dim: rgba(216,161,92,.3); --amber-glow: 0 0 4px rgba(216,161,92,.3); --green: #8fbf8f;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --cond: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15.5px/1.6 var(--sans); -webkit-text-size-adjust: 100%; }
+  body { background: radial-gradient(90% 45% at 50% 0%, #2a2219 0%, var(--bg) 60%); }
+  a { color: inherit; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  .label { font: 500 10px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+  .panel {
+    color: var(--ink);
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px), linear-gradient(180deg, #2a241d 0%, var(--al) 45%, var(--al-2) 100%);
+    border: 1px solid var(--al-line); border-top-color: var(--al-hi); border-bottom-color: #0a0907; border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.9), 0 14px 30px -18px rgba(0,0,0,.9);
+  }
+  .panel p, .panel span { color: var(--muted); }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 8px; }
+  .logo { font: 300 22px/1 var(--cond); letter-spacing: .28em; text-transform: uppercase; text-decoration: none; display: flex; align-items: center; gap: 10px; color: var(--text); }
+  .logo i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 5px rgba(143,191,143,.6); }
+  nav .links { display: flex; gap: 20px; font: 500 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  nav .links a { text-decoration: none; }
+  nav .links a:hover { color: var(--text); }
+
+  .btn { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 600 11px var(--sans); letter-spacing: .18em; text-transform: uppercase; padding: 15px 22px; border-radius: 3px; border: 1px solid transparent; transition: transform .08s; }
+  .btn:active { transform: translateY(1px); }
+  .btn-walnut { color: #1b1611; background: linear-gradient(180deg, #d8a15c, #b9853f); border-color: #8a6330; box-shadow: 0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08); }
+  .btn-walnut:hover { background: linear-gradient(180deg, #e2ad68, #c48f48); }
+  .btn-quiet { color: var(--text); background: linear-gradient(180deg, #241f19, #1a1612); border-color: #0a0907; box-shadow: 0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+  .btn .arr { font-size: 16px; line-height: 0; }
+
+  .hero { padding: 48px 0 28px; display: grid; gap: 34px; }
+  .hero h1 { font: 300 clamp(44px, 8.5vw, 84px)/.98 var(--cond); letter-spacing: .01em; text-transform: uppercase; margin: 0; color: #ece5da; }
+  .hero h1 em { font-style: normal; font-weight: 400; color: var(--amber); }
+  .hero p.lead { font-size: 17.5px; color: var(--text-dim); max-width: 560px; margin: 22px 0 0; line-height: 1.55; }
+  .hero .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+  .hero .fine { margin-top: 18px; color: var(--dim); font-size: 13px; font-family: var(--mono); }
+
+  .window { background: var(--lcd); border: 1px solid #000; border-radius: 6px; box-shadow: inset 0 2px 10px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.06), 0 30px 60px -40px rgba(0,0,0,.9); padding: 20px 20px 16px; color: var(--amber); position: relative; overflow: hidden; }
+  .window .hdr { display: flex; justify-content: space-between; align-items: baseline; font: 500 10.5px var(--mono); letter-spacing: .14em; color: #6f5a3a; text-transform: uppercase; }
+  .window .hdr b { color: var(--amber); text-shadow: var(--amber-glow); font-weight: 500; }
+  .window svg { display: block; width: 100%; height: auto; margin-top: 10px; }
+  .window .axis { display: flex; justify-content: space-between; font: 10px var(--mono); color: #5a4a30; margin-top: 6px; }
+  .trace { fill: none; stroke: var(--amber); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1400; stroke-dashoffset: 1400; animation: draw 2.6s cubic-bezier(.4,0,.2,1) .3s forwards; filter: drop-shadow(0 0 4px rgba(216,161,92,.35)); }
+  .grid { stroke: rgba(216,161,92,.1); stroke-width: 1; }
+  .mark { fill: #f0d2a6; opacity: 0; animation: pop .5s ease forwards; }
+  .mark.a { animation-delay: 1.4s; } .mark.b { animation-delay: 2.7s; } .mark.c { animation-delay: 2.1s; }
+  .tag { font: 500 11px var(--mono); fill: var(--amber); opacity: 0; animation: pop .5s ease forwards; }
+  .tag.a { animation-delay: 1.5s; } .tag.b { animation-delay: 2.8s; } .tag.c { animation-delay: 2.2s; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes pop { to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .trace { animation: none; stroke-dashoffset: 0; } .mark, .tag { animation: none; opacity: 1; } }
+
+  section { padding: 44px 0; }
+  section + section { border-top: 1px solid rgba(255,255,255,.08); }
+  .eyebrow { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.12), transparent); }
+  h2 { font: 300 clamp(32px, 5vw, 46px)/1.05 var(--cond); letter-spacing: .04em; text-transform: uppercase; margin: 0 0 14px; max-width: 760px; color: #ece5da; }
+  .sub { color: var(--text-dim); font-size: 16.5px; max-width: 640px; margin: 0; }
+
+  .steps { display: grid; gap: 10px; margin-top: 28px; }
+  .step { padding: 18px 20px 16px; display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: start; }
+  .step .n { font: 300 36px/1 var(--cond); color: #d8a15c; grid-row: 1 / span 2; margin-top: 2px; }
+  .step h3 { margin: 0; font: 600 16px var(--sans); color: var(--ink); }
+  .step p { margin: 0; font-size: 14px; }
+
+  .grid5 { display: grid; gap: 10px; margin-top: 28px; }
+  .m { padding: 16px 18px 14px; }
+  .m .val { font: 500 11px var(--mono); color: #d8a15c; letter-spacing: .04em; text-transform: uppercase; }
+  .m h3 { margin: 6px 0 4px; font: 600 16px var(--sans); color: var(--ink); }
+  .m p { margin: 0; font-size: 13.5px; }
+
+  .board { padding: 18px 20px 14px; margin-top: 28px; overflow-x: auto; }
+  .board table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 520px; }
+  .board thead th { text-align: right; padding: 0 0 10px 18px; font: 600 13px var(--sans); white-space: nowrap; color: var(--ink); }
+  .board thead th:first-child { text-align: left; padding-left: 0; color: var(--muted); font-weight: 500; }
+  .board tbody th { text-align: left; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.07); font: 13px var(--sans); color: var(--muted); white-space: nowrap; }
+  .board td { padding: 10px 0 10px 18px; border-top: 1px solid rgba(255,255,255,.07); text-align: right; font: 500 13px var(--mono); white-space: nowrap; color: var(--ink); }
+  .board td.best { color: #d8a15c; }
+  .board .cap { margin: 12px 0 0; font-size: 12.5px; font-style: italic; }
+
+  .two { display: grid; gap: 28px; margin-top: 26px; }
+  .two p { margin: 0 0 12px; color: var(--text-dim); }
+  .two h3 { font: 400 22px/1 var(--cond); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 10px; color: #ece5da; }
+  blockquote { margin: 0; padding: 16px 20px; border-left: 2px solid var(--amber); font-size: 18px; line-height: 1.45; color: var(--text); }
+
+  .also { display: grid; gap: 8px; margin-top: 26px; }
+  .also .item { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; padding: 12px 16px; }
+  .also .item .k { font: 500 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #d8a15c; white-space: nowrap; }
+  .also .item span { font-size: 13.5px; }
+
+  .final { text-align: center; padding: 60px 0 70px; }
+  .final h2 { margin: 0 auto 14px; }
+  .final .cta { margin-top: 26px; }
+  footer { border-top: 1px solid rgba(255,255,255,.08); padding: 26px 0 44px; color: var(--dim); font: 12px var(--mono); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+  @media (min-width: 760px) {
+    .hero { grid-template-columns: 1.05fr .95fr; align-items: center; padding: 70px 0 50px; gap: 48px; }
+    .steps { grid-template-columns: repeat(3, 1fr); }
+    .step { grid-template-columns: 1fr; }
+    .step .n { grid-row: auto; margin-bottom: 6px; }
+    .grid5 { grid-template-columns: repeat(3, 1fr); }
+    .two { grid-template-columns: 1fr 1fr; gap: 48px; }
+    .also { grid-template-columns: repeat(2, 1fr); }
+    section { padding: 64px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="index.html"><i></i>Soundcheck</a>
+    <div class="links"><a href="#how">How it works</a><a href="#measures">The five numbers</a><a href="#why">Why signals</a><a href="compare.html">Open the tool</a></div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Your ears.<br>Reference signals.<br><em>Numbers you can compare.</em></h1>
+      <p class="lead">Soundcheck plays the same synthesized test signals into every pair of headphones you own — and turns what you hear into a scoreboard. No app, no downloads, no reviewer's taste in the way.</p>
+      <div class="cta">
+        <a class="btn btn-walnut" href="compare.html">Start comparing <span class="arr">→</span></a>
+        <a class="btn btn-quiet" href="#how">How it works</a>
+      </div>
+      <p class="fine">Works in any modern browser, phone or desktop. Everything is generated locally at your DAC's sample rate — nothing is streamed or lossy.</p>
+    </div>
+
+    <div class="window" aria-label="Illustration: a frequency axis with the marked bass and treble limits">
+      <div class="hdr"><span>HP·1 &nbsp;·&nbsp; <b>HD 650</b></span><span>48 kHz</span></div>
+      <svg viewBox="0 0 520 220" role="img">
+        <g class="grid">
+          <line x1="0" y1="55" x2="520" y2="55"/><line x1="0" y1="110" x2="520" y2="110"/><line x1="0" y1="165" x2="520" y2="165"/>
+          <line x1="104" y1="0" x2="104" y2="200"/><line x1="208" y1="0" x2="208" y2="200"/><line x1="312" y1="0" x2="312" y2="200"/><line x1="416" y1="0" x2="416" y2="200"/>
+        </g>
+        <path class="trace" d="M 10 190 C 40 170, 55 128, 80 118 S 130 108, 170 112 S 240 118, 290 108 S 350 92, 385 100 S 430 122, 455 150 S 495 188, 512 194"/>
+        <circle class="mark a" cx="80" cy="118" r="5"/>
+        <text class="tag a" x="66" y="98">24 Hz</text>
+        <circle class="mark c" cx="385" cy="100" r="5"/>
+        <text class="tag c" x="360" y="80">5.6 kHz peak</text>
+        <circle class="mark b" cx="455" cy="150" r="5"/>
+        <text class="tag b" x="418" y="178">16.2 kHz</text>
+      </svg>
+      <div class="axis"><span>20 Hz</span><span>100</span><span>1 k</span><span>10 k</span><span>20 kHz</span></div>
+    </div>
+  </header>
+
+  <section id="how">
+    <div class="eyebrow"><span class="label">How it works</span></div>
+    <h2>Five sliders. Five numbers. Then swap headphones and do it again.</h2>
+    <p class="sub">Each slider plays one signal. You move it until you find the edge — the point where the tone vanishes, or where two tones sound equally loud — and press Mark. That number goes on the scoreboard under the headphones you named.</p>
+    <div class="steps">
+      <div class="step panel"><div class="n">1</div><h3>Name the pair</h3><p>“HD 650 + Apple dongle”, “AirPods Pro 2”, whatever is on your head. The chain matters, so name the chain.</p></div>
+      <div class="step panel"><div class="n">2</div><h3>Slide to the edge, mark it</h3><p>Fine-tune with − / + or the arrow keys. A landmark under the display tells you what the number means — <em>“27.5 Hz: A0, the lowest key on a piano”</em>.</p></div>
+      <div class="step panel"><div class="n">3</div><h3>Swap, repeat, read the board</h3><p>Same signals, same ears, same volume. Whatever differs between the columns is the gear.</p></div>
+    </div>
+  </section>
+
+  <section id="measures">
+    <div class="eyebrow"><span class="label">The five numbers</span></div>
+    <h2>What you actually find out.</h2>
+    <p class="sub">Not “warm” or “analytical”. Frequencies and decibels — the vocabulary the spec sheet uses, measured on your head instead of a dummy's.</p>
+    <div class="grid5">
+      <div class="m panel"><div class="val">Hz · lower is deeper</div><h3>Bass extension</h3><p>Slide a sine down from 300 Hz until it stops being a pitch. Well-extended cans still deliver a tone at 20–25 Hz; small drivers give up around 40.</p></div>
+      <div class="m panel"><div class="val">Hz · higher is airier</div><h3>Treble extension</h3><p>Slide up from 3 kHz until it vanishes, then back until it returns. Yes, your age is in this number — but it is the same age for every pair you test.</p></div>
+      <div class="m panel"><div class="val">± dB vs 1 kHz</div><h3>Bass level</h3><p>A 1 kHz reference alternates with 100 Hz. Match their loudness. Positive means the bass needed help; negative means the pair is bass-forward.</p></div>
+      <div class="m panel"><div class="val">± dB vs 1 kHz</div><h3>Treble level</h3><p>Same match with 8 kHz. Negative is bright; positive is dark. Compare it to the bass number and you have the tilt in two figures.</p></div>
+      <div class="m panel"><div class="val">Hz · where it bites</div><h3>Harshness peak</h3><p>Hand-sweep 2–12 kHz and mark the spot that jumps out. Around 6 kHz it is sibilance; near 3 kHz it is shout; above 9 it is tizz.</p></div>
+    </div>
+
+    <div class="board panel">
+      <table>
+        <thead><tr><th>Example</th><th>HD 650 + dongle</th><th>AirPods Pro 2</th><th>DT 770 Pro</th></tr></thead>
+        <tbody>
+          <tr><th>Bass extension</th><td>24 Hz</td><td class="best">19 Hz</td><td>21 Hz</td></tr>
+          <tr><th>Treble extension</th><td>16.2 kHz</td><td>15.8 kHz</td><td class="best">16.5 kHz</td></tr>
+          <tr><th>Bass vs 1 kHz</th><td>+3.0 dB</td><td>−2.5 dB</td><td>−1.0 dB</td></tr>
+          <tr><th>Treble vs 1 kHz</th><td>+1.5 dB</td><td>+0.5 dB</td><td>−4.0 dB</td></tr>
+          <tr><th>Harshness peak</th><td>5.6 kHz</td><td>7.1 kHz</td><td>8.2 kHz</td></tr>
+        </tbody>
+      </table>
+      <p class="cap">Illustrative values, one listener, one evening. Your board will be yours — saved in your browser, never uploaded.</p>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="eyebrow"><span class="label">Why signals, not songs</span></div>
+    <h2>A sine wave has no taste.</h2>
+    <div class="two">
+      <div>
+        <p>Headphones are usually judged with music, and music drags taste along with it. A studio monitor and a bass-tuned consumer set sound “wrong” to each other's fans, and a track you love will flatter whichever pair plays it the way you're used to.</p>
+        <p>A test signal doesn't care. Either the 24 Hz tone is there or it isn't. Either 100 Hz is louder than 1 kHz or it isn't. The same five signals go into every pair, and the only thing that changes between columns is the gear.</p>
+        <p>Everything is synthesized in the browser with the Web Audio API — sweeps, tones, pink noise, a kick drum, a Karplus–Strong plucked string — sample by sample, at whatever rate your DAC is running. No codec, no stream, no file.</p>
+      </div>
+      <div>
+        <blockquote>Your ears are part of the chain. So keep them constant: same person, same device volume, different headphones — and the differences are the headphones.</blockquote>
+        <h3 style="margin-top:26px">Also inside</h3>
+        <div class="also">
+          <div class="item panel"><span class="k">Listening</span><span>Kick drum, plucked strings, hi-hats, pink noise, imaging pan — rate each 1–5 while it plays.</span></div>
+          <div class="item panel"><span class="k">Checks</span><span>Left / right, absolute phase, a stereo pan, full-range sweeps you can freeze with Hold.</span></div>
+          <div class="item panel"><span class="k">Tools</span><span>A tone generator: any frequency, sine / triangle / square / saw. Level in dBFS, stereo peak meter.</span></div>
+          <div class="item panel"><span class="k">Private</span><span>Nothing leaves your device. Results live in your browser's storage.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <h2>Put a number on it.</h2>
+    <p class="sub" style="margin:0 auto">Two minutes per pair. Start with whatever is closest to hand.</p>
+    <div class="cta"><a class="btn btn-walnut" href="compare.html">Open Soundcheck <span class="arr">→</span></a></div>
+  </section>
+
+  <footer>
+    <span>Soundcheck · HP·1 · built on the Web Audio API</span>
+    <span>Start at a low level. On iPhone the silent switch must be off.</span>
+  </footer>
+</div>
+</body>
+</html>

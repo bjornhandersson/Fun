@@ -33,6 +33,13 @@ So far the fly:
 All of it visualized live in a **Godot** viewer showing the world and the neurons side by
 side. See the [project README](fruitfly/README.md) for the full story.
 
+### 🎧 [soundcheck](soundcheck/) — hi-fi test signals from first principles
+
+A mobile-first web page for testing headphones and audio chains. Every test signal —
+sweeps, a kick drum, a Karplus–Strong plucked string, pink noise — is **synthesized
+sample by sample in the browser**; nothing is downloaded. Open [`index.html`](soundcheck/index.html)
+and listen.
+
 ## The common thread
 
 - **Bottom-up.** Start from the primitive (a neuron, an opcode, a packet), not the

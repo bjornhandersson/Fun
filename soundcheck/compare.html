@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16130f">
+<meta name="description" content="Precise, synthesized test signals for headphones and hi-fi setups: sweeps, tones, pink noise, phase and imaging. Runs in any browser.">
+<title>Soundcheck — Headphone Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16130f; --bg-2: #1c1813;
+    --al: #241f19; --al-2: #1e1a15; --al-3: #191612; --al-line: #0f0d0a; --al-hi: rgba(255,255,255,.07);
+    --ink: #e6ded2; --muted: #a39a8b; --dim: #6f675b;
+    --lcd: #0f0d0a; --amber: #d8a15c; --amber-dim: rgba(216,161,92,.3); --amber-glow: 0 0 4px rgba(216,161,92,.3);
+    --green: #8fbf8f; --red: #d9694f;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --cond: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --bar-h: 84px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: #e6ded2; font: 14.5px/1.5 var(--sans); -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+  body { background: radial-gradient(90% 45% at 50% 0%, #2a2219 0%, var(--bg) 60%); min-height: 100vh; }
+  main { max-width: 640px; margin: 0 auto; padding: 14px 12px calc(var(--bar-h) + 28px + env(safe-area-inset-bottom)); }
+  b { font-weight: 600; }
+
+  .label { font: 500 9.5px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+
+  /* ---- faceplate: brushed aluminium, slim ---- */
+  .panel {
+    color: var(--ink);
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #2a241d 0%, var(--al) 45%, var(--al-2) 100%);
+    border: 1px solid var(--al-line); border-top-color: var(--al-hi); border-bottom-color: #0a0907;
+    border-radius: 4px; box-shadow: 0 1px 0 rgba(0,0,0,.9), 0 10px 24px -14px rgba(0,0,0,.9);
+  }
+  .panel .label, .panel .what, .panel .how, .panel .ref { color: var(--muted); }
+  /* screws in the corners of the bigger plates */
+  header.panel, .setup.panel, .board.panel, .verdict.panel { position: relative; }
+  header.panel::before, header.panel::after, .board.panel::before, .board.panel::after {
+    content: ""; position: absolute; top: 9px; width: 6px; height: 6px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #4a4238, #2a2520 70%, #0f0d0a); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), 0 1px 0 rgba(255,255,255,.06);
+  }
+  header.panel::before, .board.panel::before { left: 9px; } header.panel::after, .board.panel::after { right: 9px; }
+
+  /* ---- header ---- */
+  header.panel { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; padding: 16px 22px; margin-bottom: 8px; }
+  .brand { font: 300 26px/1 var(--cond); letter-spacing: .28em; text-transform: uppercase; margin: 0; color: var(--ink); }
+  .brand a { color: inherit; text-decoration: none; }
+  .brand small { display: block; margin-top: 7px; font: 500 9.5px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+  .model { font: 500 10px var(--mono); color: var(--dim); letter-spacing: .12em; text-align: right; line-height: 1.6; }
+  .led { width: 7px; height: 7px; border-radius: 50%; background: #3a2e22; box-shadow: inset 0 1px 1px rgba(0,0,0,.6); transition: all .3s; }
+  .led.on { background: var(--green); box-shadow: 0 0 5px rgba(143,191,143,.6); }
+  .power { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .power span { font: 500 8.5px var(--sans); letter-spacing: .2em; color: var(--muted); }
+
+  /* ---- source selector ---- */
+  .cats { display: flex; gap: 4px; padding: 5px; margin-bottom: 8px; overflow-x: auto; scrollbar-width: none; }
+  .cats::-webkit-scrollbar { display: none; }
+  .cat { flex: 1 0 auto; text-align: center; padding: 8px 12px 7px; border-radius: 3px; font: 500 10px var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); position: relative; }
+  .cat::after { content: ""; display: block; width: 4px; height: 4px; border-radius: 50%; margin: 5px auto 0; background: #3a332a; box-shadow: inset 0 1px 1px rgba(0,0,0,.6); }
+  .cat.on { color: var(--ink); background: rgba(255,255,255,.35); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(0,0,0,.08); }
+  .cat.on::after { background: var(--amber); box-shadow: var(--amber-glow); }
+  .cat.soon { opacity: .55; }
+
+  .notice { border-left: 2px solid var(--amber); padding: 2px 12px; margin: 10px 4px 14px; font-size: 13px; color: #a39a8b; line-height: 1.5; }
+  .notice b { color: #ece5da; }
+
+  /* ---- displays ---- */
+  .display {
+    font-family: var(--mono); color: var(--amber); text-shadow: var(--amber-glow);
+    background: var(--lcd); border: 1px solid #000; border-radius: 3px; box-shadow: inset 0 2px 6px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.06);
+    padding: 5px 10px; font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: .02em;
+  }
+
+  /* ---- level ---- */
+  .volume { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 10px 16px; }
+  .volume input { width: 100%; }
+  .volume .display { font-size: 12.5px; min-width: 9.5ch; text-align: right; }
+
+  /* ---- faders: slim rectangular caps ---- */
+  input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; height: 38px; margin: 0; cursor: pointer; }
+  input[type=range]::-webkit-slider-runnable-track { height: 3px; border-radius: 1px; background: #332c24; box-shadow: inset 0 1px 1px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.06); }
+  input[type=range]::-moz-range-track { height: 3px; background: #332c24; }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 30px; margin-top: -13.5px; border-radius: 2px;
+    background: linear-gradient(90deg, #1d1915 0%, #4a4238 20%, #2f2923 48%, #2f2923 52%, #4a4238 80%, #1d1915 100%);
+    border: 1px solid #0a0907; box-shadow: 0 2px 5px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  input[type=range]::-moz-range-thumb { width: 16px; height: 30px; border-radius: 2px; border: 1px solid #0a0907; background: linear-gradient(90deg, #1d1915, #4a4238 20%, #2f2923 50%, #4a4238 80%, #1d1915); }
+  input[type=range]:active::-webkit-slider-thumb { box-shadow: 0 1px 3px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.1), 0 0 0 2px var(--amber-dim); }
+
+  /* ---- section headings ---- */
+  h2 { display: flex; align-items: baseline; gap: 12px; margin: 26px 4px 8px; font: 300 24px/1 var(--cond); letter-spacing: .12em; text-transform: uppercase; color: #ece5da; }
+  h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.12), transparent); align-self: center; }
+  h2 .progress { font: 500 11px var(--mono); color: var(--amber); text-shadow: var(--amber-glow); letter-spacing: .05em; }
+  h2.sub-h { font: 500 9.5px var(--sans); letter-spacing: .2em; color: var(--dim); margin: 16px 4px 6px; }
+
+  /* ---- test faceplate ---- */
+  .test { padding: 12px 16px; margin-bottom: 6px; display: grid; grid-template-columns: 1fr auto; gap: 1px 14px; align-items: start; }
+  .test.playing { border-color: var(--amber-dim); box-shadow: 0 1px 0 rgba(0,0,0,.9), 0 0 0 1px rgba(216,161,92,.25); }
+  .test h3 { margin: 0; font: 500 16px/1.25 var(--sans); letter-spacing: -.005em; color: var(--ink); }
+  .test .what { font-size: 13px; margin: 3px 0 0; grid-column: 1; }
+  .test .how { font-size: 12.5px; margin: 10px 0 0; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.07); grid-column: 1 / -1; }
+  .test .how b { color: var(--ink); }
+  .test h3 .done { float: right; font: 500 11px var(--mono); color: #8fbf8f; margin-left: 10px; margin-top: 3px; }
+
+  /* transport knob: machined, small */
+  .play {
+    grid-row: 1 / span 2; align-self: center; position: relative;
+    width: 46px; height: 46px; border-radius: 50%; border: 1px solid #0f0d0a; cursor: pointer; padding: 0;
+    background: radial-gradient(circle at 50% 30%, #4a4238 0%, #332d26 55%, #241f19 100%);
+    box-shadow: 0 2px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 3px rgba(0,0,0,.15);
+    color: var(--ink); font-size: 13px; display: grid; place-items: center; transition: transform .08s;
+  }
+  .play::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1px solid rgba(255,255,255,.07); }
+  .play:active { transform: scale(.96); }
+  .playing .play { color: #d8a15c; }
+  .playing .play::before { border-color: var(--amber); box-shadow: 0 0 6px var(--amber-dim); }
+
+  .tone { display: flex; gap: 6px; grid-column: 1 / -1; margin-top: 10px; }
+  .tone input, .tone select { flex: 1; min-width: 0; font: 14px var(--mono); color: var(--amber); text-shadow: var(--amber-glow); background: var(--lcd); border: 1px solid #000; border-radius: 3px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.9); padding: 9px 11px; -webkit-appearance: none; appearance: none; }
+
+  /* sliders */
+  .finder { grid-column: 1 / -1; margin-top: 8px; }
+  .finder .row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; }
+  .nudge { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #0f0d0a; cursor: pointer; padding: 0; color: var(--ink); font: 400 18px/1 var(--sans);
+    background: radial-gradient(circle at 50% 30%, #4a4238, #332d26 60%, #241f19); box-shadow: 0 1px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08); }
+  .nudge:active { transform: translateY(1px); }
+  .finder .big { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin-top: 2px; }
+  .finder .display { font-size: 24px; font-weight: 500; padding: 6px 12px; line-height: 1.15; }
+  .finder .ref { font-size: 12.5px; min-height: 1.4em; margin-top: 8px; }
+
+  /* buttons on the plate */
+  .mark, .btn-w, .btn-q, .again {
+    font: 600 10px var(--sans); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; color: var(--ink);
+    height: 38px; padding: 0 14px; border-radius: 3px; border: 1px solid #0f0d0a;
+    background: linear-gradient(180deg, #3a332a, #2a2520); box-shadow: 0 1px 3px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .mark:active, .btn-w:active, .btn-q:active { transform: translateY(1px); }
+  .mark.saved { color: #8fbf8f; }
+  .btn-w { background: linear-gradient(180deg, #d8a15c, #b9853f); color: #1b1611; border-color: #8a6330; box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.15); }
+
+  /* ratings */
+  .rate { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.07); }
+  .rate button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #0f0d0a; cursor: pointer; padding: 0; position: relative;
+    background: radial-gradient(circle at 50% 30%, #4a4238, #332d26 60%, #241f19); box-shadow: 0 1px 3px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); }
+  .rate button::after { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: #3a332a; box-shadow: inset 0 1px 1px rgba(0,0,0,.6); }
+  .rate button.on::after { background: var(--amber); box-shadow: var(--amber-glow); }
+  .rate-label { margin-left: 4px; font-size: 12.5px; color: var(--muted); font-style: italic; }
+
+  .setup { padding: 10px 16px 12px; margin-bottom: 6px; display: grid; gap: 6px; }
+  .setup input { width: 100%; font: 15px var(--mono); color: var(--amber); text-shadow: var(--amber-glow); background: var(--lcd); border: 1px solid #000; border-radius: 3px; box-shadow: inset 0 2px 6px rgba(0,0,0,.9); padding: 10px 12px; -webkit-appearance: none; }
+  .setup input::placeholder { color: #6a5330; text-shadow: none; }
+
+  /* result card */
+  .verdict { padding: 14px 16px 12px; margin: 4px 0 8px; }
+  .v-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+  .v-head h3 { margin: 2px 0 0; font: 500 18px/1.2 var(--sans); color: var(--ink); }
+  .v-type { font: 400 20px/1.15 var(--cond); letter-spacing: .04em; text-transform: uppercase; color: #d8a15c; text-align: right; max-width: 50%; padding-top: 10px; }
+  .v-lines { list-style: none; margin: 12px 0 0; padding: 0; }
+  .v-lines li { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.07); font-size: 13px; color: var(--muted); align-items: baseline; }
+  .v-lines li b { font: 500 13px var(--mono); color: var(--ink); min-width: 8.5ch; }
+  .v-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .v-foot { margin: 12px 0 0; color: var(--dim); font-size: 12px; font-style: italic; }
+  @media (max-width: 480px) { .v-head { flex-direction: column; gap: 4px; } .v-type { text-align: left; max-width: none; padding-top: 0; } .v-actions button { flex: 1 1 45%; } }
+
+  /* scoreboard */
+  .board { padding: 14px 16px; }
+  .board .scroll { overflow-x: auto; margin: -4px -6px; padding: 4px 6px; }
+  .board table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .board thead th { text-align: right; vertical-align: bottom; padding: 2px 0 8px 14px; font: 600 12.5px var(--sans); color: var(--ink); white-space: nowrap; }
+  .board thead th:first-child { padding-left: 0; }
+  .board thead th.cur span { color: #d8a15c; }
+  .board thead th button { background: none; border: 0; color: var(--dim); font-size: 11px; cursor: pointer; margin-left: 6px; padding: 0; }
+  .board tbody th { text-align: left; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.07); font: 12.5px var(--sans); color: var(--muted); white-space: nowrap; }
+  .board td { padding: 8px 0 8px 14px; border-top: 1px solid rgba(255,255,255,.07); }
+  .board td.num { text-align: right; white-space: nowrap; font: 500 12.5px var(--mono); color: var(--ink); }
+  .board td.num.best { color: #d8a15c; }
+  .board td.num small { display: block; font-size: 9.5px; color: var(--dim); font-weight: 400; }
+  .board tr.overall th, .board tr.overall td { color: var(--ink); font-weight: 600; }
+  .board tr.overall td.num { font-size: 15px; }
+  .board .dots { letter-spacing: .06em; font-size: 11px; }
+  .board .empty { color: var(--muted); font-size: 13px; margin: 0; font-style: italic; }
+
+  /* drawers: slim black units in the rack */
+  .drawer { margin-top: 8px; }
+  .drawer summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1px 12px; padding: 11px 16px;
+    background: linear-gradient(180deg, #221d17, #1a1612); border: 1px solid #0a0907; border-top-color: rgba(255,255,255,.1); border-radius: 4px; box-shadow: 0 1px 0 rgba(0,0,0,.9); }
+  .drawer summary::-webkit-details-marker { display: none; }
+  .drawer summary::after { content: ""; grid-column: 2; grid-row: 1 / span 2; width: 5px; height: 5px; border-radius: 50%; background: #3a332a; box-shadow: inset 0 1px 1px rgba(0,0,0,.8); }
+  .drawer[open] summary::after { background: var(--amber); box-shadow: var(--amber-glow); }
+  .drawer[open] summary { margin-bottom: 6px; }
+  .drawer summary .label { color: #e6ded2; }
+  .drawer summary .sub { grid-column: 1; font-size: 12px; color: var(--dim); }
+  footer { color: var(--dim); font-size: 12px; margin: 28px 6px 0; line-height: 1.55; }
+
+  /* ---- now-playing strip: black unit, LCD, spectrum ---- */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--bar-h) + env(safe-area-inset-bottom));
+    padding: 0 12px env(safe-area-inset-bottom);
+    background: linear-gradient(180deg, #241f19, #1a1612); border-top: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 -10px 30px rgba(0,0,0,.6);
+    display: flex; align-items: center; gap: 10px; transform: translateY(110%); transition: transform .22s ease;
+  }
+  .bar.on { transform: none; }
+  .bar .window { flex: 1; min-width: 0; background: var(--lcd); border: 1px solid #000; border-radius: 4px; box-shadow: inset 0 2px 8px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.08);
+    padding: 7px 11px; display: grid; grid-template-columns: 1fr auto; gap: 1px 12px; align-items: center; }
+  .bar .title { font: 500 9px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: #6f5a3a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; grid-column: 1; }
+  .bar .readout { font: 500 21px/1.2 var(--mono); color: var(--amber); text-shadow: var(--amber-glow); min-height: 1.2em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; grid-column: 1; }
+  .spectrum { grid-column: 2; grid-row: 1 / span 2; width: 132px; height: 40px; display: block; image-rendering: pixelated; }
+  .bar .hold, .bar .stop { height: 46px; border-radius: 3px; border: 1px solid #0f0d0a; cursor: pointer; color: var(--ink);
+    background: linear-gradient(180deg, #3a332a, #2a2520); box-shadow: 0 2px 5px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08); }
+  .bar .hold { font: 600 10px var(--sans); letter-spacing: .18em; text-transform: uppercase; min-width: 60px; padding: 0 12px; }
+  .bar .hold:active, .bar .stop:active { transform: translateY(1px); }
+  .bar .hold.armed { color: #d8a15c; }
+  .bar .hold:disabled { color: #8fbf8f; }
+  .bar .stop { width: 46px; border-radius: 50%; font-size: 13px; }
+
+  @media (min-width: 640px) { .brand { font-size: 30px; } main { padding-top: 26px; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="panel">
+    <div class="power"><div class="led" id="powerLed"></div><span>POWER</span></div>
+    <h1 class="brand"><a href="index.html">Soundcheck</a> <small>Compare headphones · Reference signals</small></h1>
+    <div class="model">HP·1<br>Web Audio</div>
+  </header>
+
+  <nav class="cats panel" aria-label="Product categories">
+    <span class="cat on">Headphones</span>
+    <span class="cat soon">Speakers</span>
+    <span class="cat soon">DAC · Amp</span>
+  </nav>
+
+  <div class="setup panel">
+    <label class="label" for="setupName">Headphones under test</label>
+    <input id="setupName" placeholder="e.g. HD 650 + Apple dongle" aria-label="Setup name" autocomplete="off">
+  </div>
+
+  <h2>Compare <span class="progress" id="progress">0 / 5</span></h2>
+  <p class="notice">Same five signals for every pair. Slide to the edge — − / + or ← → to fine tune — and <b>Mark</b>. After the fifth Mark you get a verdict and a card to share; then swap headphones and do the next pair. Start at a low level; on iPhone the silent switch must be off.</p>
+  <div id="explore"></div>
+
+  <section class="verdict panel" id="verdict" hidden>
+    <div class="v-head">
+      <div><div class="label">Result</div><h3 id="vName"></h3></div>
+      <div class="v-type" id="vType"></div>
+    </div>
+    <ul class="v-lines" id="vLines"></ul>
+    <div class="v-actions">
+      <button class="btn-w" id="vShare">Share image</button>
+      <button class="btn-q" id="vLink">Copy link</button>
+      <button class="btn-q" id="vNext">Add another pair →</button>
+    </div>
+    <p class="v-foot">Measured by ear, not by microphone. Same listener, same volume, different headphones — the differences are the gear.</p>
+  </section>
+  <p class="notice" id="shared" hidden></p>
+
+  <h2>Scoreboard</h2>
+  <div class="board panel"><div id="boardBody"></div></div>
+
+  <details class="drawer">
+    <summary><span class="label">Listening signals</span><span class="sub">Kick, strings, hi-hats, pink noise, sweeps — rate each while it plays</span></summary>
+    <div id="tests"></div>
+  </details>
+
+  <details class="drawer">
+    <summary><span class="label">Checks &amp; tools</span><span class="sub">Left / right, phase, tone generator</span></summary>
+    <div id="checks"></div>
+    <div id="utilities"></div>
+  </details>
+
+  <details class="drawer">
+    <summary><span class="label">Output level</span><span class="sub" id="sys">Standby — tap any test to power up the audio engine</span></summary>
+    <div class="volume panel">
+      <label class="label" for="vol">Level</label>
+      <input id="vol" type="range" min="0" max="100" value="35" aria-label="Output level">
+      <output class="display" for="vol" id="volOut">−20 dBFS</output>
+    </div>
+  </details>
+
+  <footer>
+    All signals are synthesized in the browser with the Web Audio API at the output device's native sample rate — nothing is streamed or lossy-compressed. The browser applies no resampling beyond what the OS mixer does; for the cleanest path, set your DAC and OS to the same rate. Upper-treble limits are as much <em>your</em> hearing as the gear.
+  </footer>
+</main>
+
+<div class="bar" id="bar" role="status" aria-live="polite">
+  <div class="window">
+    <div class="title" id="barTitle"></div>
+    <div class="readout" id="barReadout"></div>
+    <canvas class="spectrum" id="spectrum" width="132" height="40" aria-hidden="true"></canvas>
+  </div>
+  <button class="hold" id="barHold" hidden>Hold</button>
+  <button class="stop" id="barStop" aria-label="Stop">■</button>
+</div>
+
+<script>
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/* Signal generators. Each fills an AudioBuffer from plain math so the  */
+/* whole chain from sample to speaker is explicit.                      */
+/* ------------------------------------------------------------------ */
+
+// White noise, mono, `seconds` long.
+function whiteNoise(ctx, seconds) {
+  const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * seconds), ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  return buf;
+}
+
+// Pink noise (−3 dB/octave): equal energy per octave, so it is the fairest
+// "does everything sound balanced?" reference. Paul Kellet's filter.
+function pinkArray(n) {
+  const d = new Float32Array(n);
+  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+  for (let i = 0; i < d.length; i++) {
+    const w = Math.random() * 2 - 1;
+    b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759;
+    b2 = 0.96900 * b2 + w * 0.1538520; b3 = 0.86650 * b3 + w * 0.3104856;
+    b4 = 0.55000 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.0168980;
+    d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+    b6 = w * 0.115926;
+  }
+  return d;
+}
+function pinkNoise(ctx, seconds) {
+  const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * seconds), ctx.sampleRate);
+  buf.copyToChannel(pinkArray(buf.length), 0);
+  return buf;
+}
+
+// A kick drum: a sine whose pitch drops from 160 Hz to 45 Hz in ~80 ms,
+// with a fast decay and a tiny noise click. Repeats every `period` seconds.
+function kickLoop(ctx, period, hits) {
+  const sr = ctx.sampleRate;
+  const buf = ctx.createBuffer(1, Math.floor(sr * period * hits), sr);
+  const d = buf.getChannelData(0);
+  let phase = 0;
+  for (let i = 0; i < d.length; i++) {
+    const t = (i / sr) % period;
+    if (t < 1 / sr) phase = 0;                             // new hit: reset phase
+    const f = 45 + 115 * Math.exp(-t * 35);
+    phase += 2 * Math.PI * f / sr;
+    const body = Math.sin(phase) * Math.exp(-t * 7) * Math.min(1, t * 400);
+    const click = (Math.random() * 2 - 1) * Math.exp(-t * 300) * 0.25;
+    d[i] = 0.9 * (body + click);
+  }
+  return buf;
+}
+
+// Karplus–Strong plucked string: a burst of noise circulating in a delay
+// line with a two-point average lowpass. Returns one note of `seconds`.
+function pluck(ctx, freq, seconds, out, offset) {
+  const sr = ctx.sampleRate, N = Math.round(sr / freq);
+  const ring = new Float32Array(N);
+  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+  let p = 0;
+  const len = Math.floor(sr * seconds);
+  for (let i = 0; i < len && offset + i < out.length; i++) {
+    const next = (p + 1) % N;
+    const y = 0.5 * (ring[p] + ring[next]) * 0.996;
+    out[offset + i] += ring[p] * 0.5;
+    ring[p] = y;
+    p = next;
+  }
+}
+
+// An arpeggio then a strummed chord (A major) — a musical, mid-heavy timbre.
+function pluckPhrase(ctx) {
+  const sr = ctx.sampleRate, notes = [110, 164.8, 220, 277.2, 329.6, 440];
+  const buf = ctx.createBuffer(1, sr * 7, sr), d = buf.getChannelData(0);
+  notes.forEach((f, i) => pluck(ctx, f, 2.5, d, Math.floor(sr * i * 0.45)));
+  notes.forEach((f, i) => pluck(ctx, f, 3.5, d, Math.floor(sr * (3.2 + i * 0.04))));
+  return buf;
+}
+
+// Hi-hat pattern: short noise bursts (filtered to treble when played).
+function hatLoop(ctx, period, hits) {
+  const sr = ctx.sampleRate;
+  const buf = ctx.createBuffer(1, Math.floor(sr * period * hits), sr);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) {
+    const t = (i / sr) % period;
+    const open = Math.floor(i / sr / period) % 4 === 3;     // every 4th hit rings longer
+    d[i] = (Math.random() * 2 - 1) * Math.exp(-t * (open ? 12 : 45)) * 0.7;
+  }
+  return buf;
+}
+
+// Landmarks to make a bare number mean something.
+const BASS_REFS = [
+  [16.4, 'C0 — the lowest pipe on a cathedral organ. You feel this more than hear it.'],
+  [20, 'the textbook bottom of human hearing'],
+  [27.5, 'A0 — the lowest key on a piano'],
+  [32.7, 'C1 — a 32-foot organ pipe / the rumble in cinema LFE'],
+  [41.2, 'E1 — open low E on a bass guitar'],
+  [49, 'G1 — the low end of a kick drum\'s body'],
+  [61.7, 'B1 — the 5-string bass low B / 60 Hz mains hum'],
+  [82.4, 'E2 — the low E string on a guitar'],
+  [110, 'A2 — cello open A / a male voice\'s fundamental'],
+  [160, 'Speech fundamentals live around here — this is not bass anymore'],
+  [300, 'Upper bass / lower mids'],
+];
+const TREBLE_REFS = [
+  [3000, 'where your ear is most sensitive — babies cry here for a reason'],
+  [4186, 'C8 — the top key on a piano'],
+  [5000, 'the "presence" band; consonants and attack live here'],
+  [6000, 'the sibilance zone — "s" and "sh" sounds'],
+  [8000, 'cymbal sizzle; a 16 kHz-sample-rate phone call stops here'],
+  [10000, 'air and shimmer — many people\'s treble "sparkle"'],
+  [12000, 'many 128 kbps MP3s were low-passed around here'],
+  [14000, 'typical limit for people around 50'],
+  [15734, 'the whine of an old CRT television'],
+  [17400, 'the "Mosquito" ringtone teenagers used to hide from adults'],
+  [19000, 'only young ears and good gear get here'],
+  [20000, 'the CD / textbook upper limit of hearing'],
+];
+function nearestRef(refs, f) {
+  let best = refs[0];
+  for (const r of refs) if (Math.abs(Math.log(r[0] / f)) < Math.abs(Math.log(best[0] / f))) best = r;
+  return `≈ ${fmtHz(best[0])}: ${best[1]}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Node helpers                                                         */
+/* ------------------------------------------------------------------ */
+
+const fmtHz = f => f < 1000 ? `${Math.round(f)} Hz` : `${(f / 1000).toFixed(1)} kHz`;
+
+// Sine sweeping f0→f1 over `seconds` (exponential = equal time per octave).
+// The player ends it at `ends`; hold() freezes the frequency where it is
+// so the listener can confirm what they heard, then mark it.
+function sweep(ctx, bus, f0, f1, seconds, field) {
+  const osc = ctx.createOscillator();
+  const t0 = ctx.currentTime;
+  osc.frequency.setValueAtTime(f0, t0);
+  osc.frequency.exponentialRampToValueAtTime(f1, t0 + seconds);
+  osc.connect(bus); osc.start(t0);
+  const h = {
+    sources: [osc], ends: t0 + seconds, field, held: null,
+    freq: () => f0 * Math.pow(f1 / f0, Math.min(1, (ctx.currentTime - t0) / seconds)),
+    tick: () => fmtHz(h.held ?? h.freq()),
+    hold() {
+      const f = h.freq(), t = ctx.currentTime;
+      osc.frequency.cancelScheduledValues(t); osc.frequency.setValueAtTime(f, t);
+      h.held = f; h.ends = null;
+      return f;
+    },
+  };
+  return h;
+}
+
+// Steady tone(s). Several frequencies play together at reduced level.
+function tones(ctx, bus, freqs) {
+  const sources = freqs.map(f => {
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.frequency.value = f; g.gain.value = 1 / freqs.length;
+    osc.connect(g).connect(bus); osc.start();
+    return osc;
+  });
+  return { sources, tick: () => freqs.map(fmtHz).join(' + ') };
+}
+
+function loopBuffer(ctx, bus, buffer, through) {
+  const src = ctx.createBufferSource(); src.buffer = buffer; src.loop = true;
+  src.connect(through || bus); if (through) through.connect(bus);
+  src.start();
+  return { sources: [src] };
+}
+
+function playBuffer(ctx, bus, buffer) {
+  const src = ctx.createBufferSource(); src.buffer = buffer;
+  src.connect(bus); src.start();
+  return { sources: [src] };
+}
+
+/* ------------------------------------------------------------------ */
+/* Compare: sliders with a live readout; Mark saves the value.          */
+/* ------------------------------------------------------------------ */
+
+const fmtDb = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(1)} dB`;
+const logScale = (lo, hi) => ({ toV: x => lo * Math.pow(hi / lo, x / 1000), fromV: v => Math.round(1000 * Math.log(v / lo) / Math.log(hi / lo)) });
+const linScale = (lo, hi) => ({ toV: x => lo + (hi - lo) * x / 1000, fromV: v => Math.round(1000 * (v - lo) / (hi - lo)) });
+
+function alternate(ctx, gateA, gateB, period) {
+  const t0 = ctx.currentTime, f = 0.02;
+  for (let i = 0; i < 400; i++) {
+    const t = t0 + i * period, on = i % 2 ? gateB : gateA, off = i % 2 ? gateA : gateB;
+    on.gain.setValueAtTime(0, t); on.gain.linearRampToValueAtTime(1, t + f);
+    off.gain.setValueAtTime(1, t); off.gain.linearRampToValueAtTime(0, t + f);
+  }
+  return () => Math.floor((ctx.currentTime - t0) / period) % 2 ? 'B' : 'A';
+}
+const sineAt = (ctx, bus) => {
+  const osc = ctx.createOscillator(); osc.connect(bus); osc.start();
+  return { sources: [osc], set: v => osc.frequency.setTargetAtTime(v, ctx.currentTime, 0.01), tick: v => fmtHz(v) };
+};
+function levelMatch(ctx, bus, testFreq) {
+  const ref = ctx.createOscillator(), tst = ctx.createOscillator();
+  ref.frequency.value = 1000; tst.frequency.value = testFreq;
+  const lvRef = ctx.createGain(), lvTst = ctx.createGain(), gA = ctx.createGain(), gB = ctx.createGain();
+  lvRef.gain.value = 0.1; lvTst.gain.value = 0.1;
+  ref.connect(lvRef).connect(gA).connect(bus); tst.connect(lvTst).connect(gB).connect(bus);
+  const which = alternate(ctx, gA, gB, 1.0);
+  ref.start(); tst.start();
+  return { sources: [ref, tst], set: v => lvTst.gain.setTargetAtTime(0.1 * Math.pow(10, v / 20), ctx.currentTime, 0.01),
+    tick: v => which() === 'A' ? 'REF  1 kHz' : `${fmtHz(testFreq)}  ${fmtDb(v)}` };
+}
+
+const EXPLORE = [
+  { id: 'bass', title: 'Bass extension', best: 'low', what: 'Slide down until the tone turns into silence or a flutter.',
+    scale: logScale(10, 300), start: 60, fmt: fmtHz, hint: v => nearestRef(BASS_REFS, v), make: sineAt },
+  { id: 'treble', title: 'Treble extension', best: 'high', what: 'Slide up until the tone disappears, then back until it returns.',
+    scale: logScale(3000, 20000), start: 10000, fmt: fmtHz, hint: v => nearestRef(TREBLE_REFS, v), make: sineAt },
+  { id: 'bassLevel', title: 'Bass vs 1 kHz', unit: 'dB', what: 'A 1 kHz reference alternates with 100 Hz. Slide until both sound equally loud.',
+    scale: linScale(-20, 20), start: 0, fmt: fmtDb,
+    hint: v => v > 6 ? 'lean bass — it needed a big boost to keep up' : v < -6 ? 'bass-forward — it had to be turned well down' : 'fairly neutral bass balance',
+    make: (ctx, bus) => levelMatch(ctx, bus, 100) },
+  { id: 'trebleLevel', title: 'Treble vs 1 kHz', unit: 'dB', what: 'Same with an 8 kHz tone against 1 kHz.',
+    scale: linScale(-20, 20), start: 0, fmt: fmtDb,
+    hint: v => v > 6 ? 'dark / rolled-off treble' : v < -6 ? 'bright, forward treble' : 'fairly neutral treble balance',
+    make: (ctx, bus) => levelMatch(ctx, bus, 8000) },
+  { id: 'harsh', title: 'Harshness peak', what: 'Sweep by hand through the presence and sibilance band; find the spot that jumps out.',
+    scale: logScale(2000, 12000), start: 5000, fmt: fmtHz,
+    hint: v => v < 3500 ? 'presence region — shouty if peaked here' : v < 7000 ? 'the sibilance band — "s" sounds will spit' : 'upper treble — tizzy, splashy cymbals',
+    make: sineAt },
+];
+
+function sliderTest(m) {
+  const test = {
+    id: 'x-' + m.id, title: m.title, what: m.what, value: m.start,
+    controls: `<div class="finder">
+        <div class="row"><button class="nudge" data-d="-1" aria-label="Fine tune down">−</button>
+        <input type="range" min="0" max="1000" value="${m.scale.fromV(m.start)}" id="x-${m.id}-r" aria-label="${m.title}">
+        <button class="nudge" data-d="1" aria-label="Fine tune up">+</button></div>
+        <div class="big"><span class="display" id="x-${m.id}-f">${m.fmt(m.start)}</span><button class="mark" id="x-${m.id}-m">Mark</button></div>
+        <div class="ref" id="x-${m.id}-ref">${m.hint(m.start)}</div></div>`,
+    run(ctx, bus) { const h = m.make(ctx, bus); h.set(test.value); test.h = h; return { sources: h.sources, tick: () => h.tick(test.value) }; },
+    mount(card) {
+      const r = card.querySelector(`#x-${m.id}-r`), f = card.querySelector(`#x-${m.id}-f`), ref = card.querySelector(`#x-${m.id}-ref`), mk = card.querySelector(`#x-${m.id}-m`);
+      r.addEventListener('input', () => {
+        test.value = m.unit === 'dB' ? Math.round(m.scale.toV(+r.value) * 2) / 2 : m.scale.toV(+r.value);
+        f.textContent = m.fmt(test.value); ref.textContent = m.hint(test.value);
+        mk.textContent = 'Mark'; mk.classList.remove('saved');
+        if (player.active && player.active.test === test) test.h.set(test.value); else player.play(test, card);
+      });
+      mk.addEventListener('click', () => { board.save(m.id, test.value); player.stop(); mk.textContent = 'Saved'; mk.classList.add('saved'); });
+      // Fine tuning: 1 % (frequency) or 0.5 dB (level) per step; Shift = ×5.
+      test.nudge = (dir, coarse) => {
+        const k = coarse ? 5 : 1;
+        const v = m.unit === 'dB' ? test.value + dir * 0.5 * k : test.value * Math.pow(1.01, dir * k);
+        r.value = Math.max(0, Math.min(1000, m.scale.fromV(v)));
+        r.dispatchEvent(new Event('input'));
+      };
+      card.querySelectorAll('.nudge').forEach(b => b.addEventListener('click', e => test.nudge(+b.dataset.d, e.shiftKey)));
+      test.refresh = () => { const v = board.load()[board.name()]?.[m.id]; card.querySelector('.done').textContent = v != null ? m.fmt(v) : ''; };
+    },
+  };
+  return test;
+}
+
+/* ------------------------------------------------------------------ */
+/* Listening tests: no number, just ears.                              */
+/* ------------------------------------------------------------------ */
+
+const UTILITIES = [
+    { id: 'gen', title: 'Tone generator', what: 'Any frequency, any waveform. Type a frequency, pick a waveform.',
+      how: 'Tip: a <b>square</b> or <b>sawtooth</b> at 50–100 Hz makes housing rattles and port chuffing obvious; a low sine reveals driver bottoming-out.',
+      controls: `<div class="tone"><input id="genF" type="number" inputmode="decimal" min="1" max="24000" step="1" value="1000" aria-label="Frequency in Hz">
+        <select id="genW" aria-label="Waveform"><option>sine</option><option>triangle</option><option>square</option><option>sawtooth</option></select></div>`,
+      run(ctx, bus) {
+        const f = Math.min(24000, Math.max(1, +document.getElementById('genF').value || 1000));
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = document.getElementById('genW').value; osc.frequency.value = f;
+        g.gain.value = osc.type === 'sine' ? 1 : 0.5;                 // non-sine waves are louder
+        osc.connect(g).connect(bus); osc.start();
+        return { sources: [osc], tick: () => `${fmtHz(f)} ${osc.type}` };
+      } },
+];
+
+const TESTS = [
+  { group: 'Checks', items: [
+    { id: 'lr', title: 'Left / Right', what: 'A tone alternates between the two ears.',
+      how: '<b>Good:</b> "LEFT" is heard only on the left, "RIGHT" only on the right. If they are swapped, the headphones are on backwards (or wired wrong).',
+      run(ctx, bus) {
+        const osc = ctx.createOscillator(), pan = ctx.createStereoPanner();
+        osc.frequency.value = 440; osc.connect(pan).connect(bus);
+        const t0 = ctx.currentTime, step = 1.5;
+        for (let i = 0; i < 400; i++) pan.pan.setValueAtTime(i % 2 ? 1 : -1, t0 + i * step);
+        osc.start();
+        return { sources: [osc], tick: () => Math.floor((ctx.currentTime - t0) / step) % 2 ? '→ RIGHT' : 'LEFT ←' };
+      } },
+    { id: 'phase', title: 'Phase / polarity', what: 'Noise alternates between in-phase and inverted-phase.',
+      how: '<b>Good:</b> "IN PHASE" sounds like a compact point in the middle of your head; "OUT OF PHASE" sounds diffuse, wide, hard to place. If both sound the same, one driver is wired inverted — bass will be thin.',
+      run(ctx, bus) {
+        const src = ctx.createBufferSource(); src.buffer = pinkNoise(ctx, 4); src.loop = true;
+        const gL = ctx.createGain(), gR = ctx.createGain(), merge = ctx.createChannelMerger(2);
+        src.connect(gL).connect(merge, 0, 0); src.connect(gR).connect(merge, 0, 1); merge.connect(bus);
+        const t0 = ctx.currentTime, step = 3;
+        for (let i = 0; i < 200; i++) gR.gain.setValueAtTime(i % 2 ? -1 : 1, t0 + i * step);
+        src.start();
+        return { sources: [src], tick: () => Math.floor((ctx.currentTime - t0) / step) % 2 ? 'OUT OF PHASE' : 'IN PHASE' };
+      } },
+  ]},
+  { group: 'Bass', rate: true, items: [
+    { id: 'bass-sweep', title: 'Bass extension sweep', what: 'Sine sweep 10 → 200 Hz over 20 s. Tap HOLD the moment you hear a tone.',
+      how: 'Note where the tone first becomes clearly <b>audible</b> (not just a flutter) — that is the effective −10 dB point of the system. Well-extended cans are there by 20–25 Hz; open-backs typically roll off earlier than closed. Any sudden bloom is a resonance; any buzz is the driver or housing distorting.',
+      run: (ctx, bus) => sweep(ctx, bus, 10, 200, 20) },
+    { id: 'sub', title: 'Sub-bass 30 Hz', what: 'A steady 30 Hz tone.',
+      how: '<b>Good:</b> a clean, deep hum. <b>Bad:</b> silence, or a buzz/rattle from the housing. Equal-loudness contours make 30 Hz sound quiet at the same dBFS — that is your ear, not the transducer. Listen for cleanness, not loudness; a broken seal on IEMs shows up here first.',
+      run: (ctx, bus) => tones(ctx, bus, [30]) },
+    { id: 'sub50', title: 'Bass 50 Hz + 65 Hz', what: 'Two low tones together — a 15 Hz beat.',
+      how: 'You should hear a slow, smooth pulsing. <b>Bad:</b> the pulse sounds crackly or the housing rattles — that is distortion.',
+      run: (ctx, bus) => tones(ctx, bus, [50, 65]) },
+    { id: 'kick', title: 'Kick drum punch', what: 'A synthesized kick at 120 BPM.',
+      how: '<b>Good:</b> each hit is a tight, dry thump with a clear front edge. <b>Bad:</b> the hits smear into a boomy "wooo" that lingers (slow driver / big resonance) or sound like a click with no weight (no sub-bass).',
+      run: (ctx, bus) => loopBuffer(ctx, bus, kickLoop(ctx, 0.5, 4)) },
+  ]},
+  { group: 'Mids', rate: true, items: [
+    { id: 'mid-sweep', title: 'Mid-range sweep', what: 'Sine sweep 200 Hz → 4 kHz over 20 s. HOLD freezes it on any peak or dip you notice.',
+      how: 'The volume should stay <b>even</b> the whole way. Notice any spot where it jumps louder (peak) or dips away (hole) — these colour voices and guitars. Around 2–4 kHz is where harshness lives.',
+      run: (ctx, bus) => sweep(ctx, bus, 200, 4000, 20) },
+    { id: 'pluck', title: 'Plucked strings', what: 'A synthesized guitar-like arpeggio and chord.',
+      how: '<b>Good:</b> each note has a crisp pluck, then a warm body, and you can hear all six notes of the chord separately. <b>Bad:</b> notes sound boxy/nasal (mid peak), thin and plasticky (mid dip), or blur together.',
+      run: (ctx, bus) => playBuffer(ctx, bus, pluckPhrase(ctx)) },
+    { id: 'mid-tones', title: 'Presence 1 kHz / 3 kHz', what: 'Toggle between two reference tones.',
+      how: '1 kHz is the reference the whole audio industry uses. 3 kHz is where ears are most sensitive. They should sound of similar loudness (3 kHz will seem a bit louder — that is your ear).',
+      run(ctx, bus) {
+        const osc = ctx.createOscillator(); osc.connect(bus);
+        const t0 = ctx.currentTime, step = 2;
+        for (let i = 0; i < 300; i++) osc.frequency.setValueAtTime(i % 2 ? 3000 : 1000, t0 + i * step);
+        osc.start();
+        return { sources: [osc], tick: () => fmtHz(Math.floor((ctx.currentTime - t0) / step) % 2 ? 3000 : 1000) };
+      } },
+  ]},
+  { group: 'Treble', rate: true, items: [
+    { id: 'treble-sweep', title: 'Treble extension sweep', what: 'Sine sweep 4 → 20 kHz over 20 s. Tap HOLD when it vanishes.',
+      how: 'Note the frequency where the sound disappears. <b>Good headphones</b> reach 18–20 kHz — but your <b>ears</b> may stop earlier (16 kHz at 30, ~13 kHz at 50 is typical). Also listen for sharp peaks: a piercing spot around 6–10 kHz means sibilant, tiring treble.',
+      run: (ctx, bus) => sweep(ctx, bus, 4000, 20000, 20) },
+    { id: 'hats', title: 'Hi-hats & sibilance', what: 'Noise bursts filtered above 6 kHz, 8th notes.',
+      how: '<b>Good:</b> crisp, airy "ts ts ts" with a clear separate open hat every 4th beat. <b>Bad:</b> splashy, harsh, or "sssh"-like without detail — or so dull you barely hear them.',
+      run(ctx, bus) {
+        const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 6000;
+        return loopBuffer(ctx, bus, hatLoop(ctx, 0.25, 8), hp);
+      } },
+    { id: 'hf', title: 'High-frequency tones', what: 'Steps through 8, 10, 12, 14, 16, 18 kHz.',
+      how: 'Each step lasts 2 s. Note the last one you can hear. Cheap drivers roll off early; so do older ears. Keep volume moderate — you cannot judge damage by loudness up here.',
+      run(ctx, bus) {
+        const steps = [8000, 10000, 12000, 14000, 16000, 18000];
+        const osc = ctx.createOscillator(); osc.connect(bus);
+        const t0 = ctx.currentTime, step = 2;
+        steps.forEach((f, i) => osc.frequency.setValueAtTime(f, t0 + i * step));
+        osc.start(); osc.stop(t0 + steps.length * step);
+        return { sources: [osc], tick: () => fmtHz(steps[Math.min(steps.length - 1, Math.floor((ctx.currentTime - t0) / step))]) };
+      } },
+  ]},
+  { group: 'Overall', rate: true, items: [
+    { id: 'full', title: 'Full-range sweep', what: 'One sine sweep 20 Hz → 20 kHz over 30 s. HOLD to park on anything odd.',
+      how: 'Constant amplitude, log frequency, ~3.3 s per octave. Perceived level will follow your equal-loudness curve (peaking ~3 kHz) — anything on top of that is the response of the chain: transducer, ear coupling, and any EQ or DAC filter in the path.',
+      run: (ctx, bus) => sweep(ctx, bus, 20, 20000, 30) },
+    { id: 'pink', title: 'Pink noise', what: 'Equal energy in every octave — a neutral reference.',
+      how: 'The fastest A/B between two setups: swap and listen for what moves. A honk = mid peak, hiss on top = treble peak, boom = bass shelf. Also the right signal for a phone RTA app at the ear cup if you want a rough response plot.',
+      run: (ctx, bus) => loopBuffer(ctx, bus, pinkNoise(ctx, 4)) },
+    { id: 'pan', title: 'Stereo imaging', what: 'Pink noise glides slowly from left to right and back.',
+      how: '<b>Good:</b> the sound moves smoothly through the centre with no hole or jump in the middle, and the level stays even. <b>Bad:</b> it seems to "leap" from one ear to the other, or the centre sounds quieter.',
+      run(ctx, bus) {
+        const src = ctx.createBufferSource(); src.buffer = pinkNoise(ctx, 4); src.loop = true;
+        const pan = ctx.createStereoPanner(); src.connect(pan).connect(bus);
+        const t0 = ctx.currentTime, period = 8;
+        const curve = new Float32Array(200).map((_, i) => Math.sin(2 * Math.PI * i / 200));
+        for (let i = 0; i < 60; i++) pan.pan.setValueCurveAtTime(curve, t0 + i * period, period);
+        src.start();
+        return { sources: [src], tick: () => { const p = Math.sin(2 * Math.PI * ((ctx.currentTime - t0) / period)); return p < -0.3 ? 'LEFT ←' : p > 0.3 ? '→ RIGHT' : 'CENTRE'; } };
+      } },
+  ]},
+];
+
+/* ------------------------------------------------------------------ */
+/* Player: one AudioContext, one master gain, one active test.          */
+/* ------------------------------------------------------------------ */
+
+const player = {
+  ctx: null, master: null, active: null,
+
+  ensure() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = volumeToGain(volEl.value);
+      this.master.connect(this.ctx.destination);
+      // Stereo peak meter. Mono signals must be upmixed to both channels
+      // the way the headphones hear them, so route through an explicit
+      // 2-channel "speakers" stage before splitting.
+      const stereo = this.ctx.createGain();
+      stereo.channelCount = 2; stereo.channelCountMode = 'explicit'; stereo.channelInterpretation = 'speakers';
+      this.master.connect(stereo);
+      this.fft = this.ctx.createAnalyser(); this.fft.fftSize = 2048; this.fft.smoothingTimeConstant = 0.6; this.fft.minDecibels = -90; this.fft.maxDecibels = -10;
+      stereo.connect(this.fft);
+      this.bins = new Uint8Array(this.fft.frequencyBinCount);
+      document.getElementById('sys').textContent = `${this.ctx.sampleRate / 1000} kHz · ${this.ctx.destination.maxChannelCount} ch · tones peak at the level shown`;
+      document.getElementById('powerLed').classList.add('on');
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();   // iOS: only inside a tap
+    return this.ctx;
+  },
+
+  play(test, card) {
+    if (this.active && this.active.test === test) return this.stop();
+    this.stop();
+    const ctx = this.ensure();
+    const bus = ctx.createGain();                              // per-test bus for click-free fades
+    bus.gain.setValueAtTime(0, ctx.currentTime);
+    bus.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.03);
+    bus.connect(this.master);
+    const h = test.run(ctx, bus);
+    this.active = { test, card, bus, ...h };
+    // When the last source ends on its own, tidy up the UI.
+    h.sources[h.sources.length - 1].onended = () => { if (this.active && this.active.test === test) this.stop(); };
+    card.classList.add('playing');
+    card.querySelector('.play').textContent = '■';
+    barTitle.textContent = test.title;
+    barHold.hidden = !h.hold; barHold.disabled = false; barHold.textContent = 'Hold'; barHold.classList.remove('armed');
+    bar.classList.add('on');
+    this.tick();
+  },
+
+  stop() {
+    const a = this.active; if (!a) return;
+    this.active = null;
+    const t = this.ctx.currentTime;
+    a.bus.gain.cancelScheduledValues(t);
+    a.bus.gain.setValueAtTime(a.bus.gain.value, t);
+    a.bus.gain.linearRampToValueAtTime(0, t + 0.04);
+    a.sources.forEach(s => { s.onended = null; try { s.stop(t + 0.06); } catch (_) {} });
+    setTimeout(() => a.bus.disconnect(), 120);
+    a.card.classList.remove('playing');
+    a.card.querySelector('.play').textContent = '▶';
+    bar.classList.remove('on');
+    barReadout.textContent = '';
+  },
+
+  tick() {
+    if (!this.active) { spectrum.clear(); return; }
+    if (this.active.ends != null && this.ctx.currentTime >= this.active.ends) return this.stop();
+    barReadout.textContent = this.active.tick ? this.active.tick() : '';
+    this.fft.getByteFrequencyData(this.bins);
+    spectrum.draw(this.bins, this.ctx.sampleRate);
+    requestAnimationFrame(() => this.tick());
+  },
+};
+
+// Spectrum analyser, 24 log-spaced bands 40 Hz – 16 kHz with falling peak
+// caps. The one deliberate Winamp reference on the page.
+const spectrum = {
+  c: document.getElementById('spectrum'), n: 24, caps: new Float32Array(24), lo: 40, hi: 16000,
+  draw(bins, sr) {
+    const x = this.c.getContext('2d'), W = this.c.width, H = this.c.height, bw = W / this.n;
+    x.clearRect(0, 0, W, H);
+    for (let i = 0; i < this.n; i++) {
+      const f0 = this.lo * Math.pow(this.hi / this.lo, i / this.n), f1 = this.lo * Math.pow(this.hi / this.lo, (i + 1) / this.n);
+      const b0 = Math.floor(f0 / (sr / 2) * bins.length), b1 = Math.max(b0 + 1, Math.floor(f1 / (sr / 2) * bins.length));
+      let m = 0; for (let b = b0; b < b1 && b < bins.length; b++) if (bins[b] > m) m = bins[b];
+      const h = Math.round(m / 255 * (H - 4) / 3) * 3;                     // 3 px LED segments
+      this.caps[i] = Math.max(h, this.caps[i] - 0.6);
+      for (let y = 0; y < h; y += 3) {
+        const level = y / (H - 4);
+        x.fillStyle = level > 0.82 ? '#d9694f' : level > 0.6 ? '#d8a15c' : '#8fbf8f';
+        x.fillRect(i * bw + 1, H - 2 - y - 2, bw - 2, 2);
+      }
+      if (this.caps[i] > 0) { x.fillStyle = '#f0d2a6'; x.fillRect(i * bw + 1, H - 4 - Math.round(this.caps[i]), bw - 2, 1); }
+    }
+  },
+  clear() { this.caps.fill(0); this.c.getContext('2d').clearRect(0, 0, this.c.width, this.c.height); },
+};
+
+// Slider 0–100 → gain. Squared so the low end is fine-grained; full scale
+// sines are painfully loud, so 100 maps to 0.5.
+const volumeToGain = v => Math.pow(v / 100, 2) * 0.5;
+
+/* ------------------------------------------------------------------ */
+/* Scoreboard: one column per headphone; slider values and ratings.     */
+/* ------------------------------------------------------------------ */
+
+const board = {
+  key: 'soundcheck.compare',
+  load() { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (_) { return {}; } },
+  store(d) { try { localStorage.setItem(this.key, JSON.stringify(d)); } catch (_) {} },
+  name() { return document.getElementById('setupName').value.trim() || 'Unnamed headphones'; },
+  save(field, v) { const d = this.load(); (d[this.name()] ||= {})[field] = v; this.store(d); this.render(); },
+  remove(name) { const d = this.load(); delete d[name]; this.store(d); this.render(); },
+  rows() {
+    const rated = TESTS.filter(g => g.rate).flatMap(g => g.items);
+    return [
+      ...EXPLORE.map(m => ({ id: m.id, title: m.title, fmt: m.fmt, best: m.best })),
+      ...rated.map(t => ({ id: t.id, title: t.title, fmt: v => `<span class="dots">${'●'.repeat(v)}${'○'.repeat(DOTS - v)}</span>`, best: 'high', dots: true })),
+    ];
+  },
+  render() {
+    const d = this.load(), names = Object.keys(d), el = document.getElementById('boardBody'), cur = this.name(), rows = this.rows();
+    const mine = d[cur] || {}, n = EXPLORE.filter(m => mine[m.id] != null).length;
+    document.getElementById('progress').textContent = `${n} / ${EXPLORE.length}`;
+    [...sliderTests, ...TESTS.flatMap(g => g.items)].forEach(t => t.refresh && t.refresh());
+    verdict.render();
+    if (!names.length) { el.innerHTML = '<p class="empty">Nothing yet. Name the headphones above, then slide and Mark each of the five.</p>'; return; }
+    const esc = t => t.replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+    const bestOf = r => { const v = names.map(nm => d[nm][r.id]).filter(x => x != null); if (v.length < 2 || !r.best) return null; return r.best === 'low' ? Math.min(...v) : Math.max(...v); };
+    const avg = nm => { const v = rows.filter(r => r.dots).map(r => d[nm][r.id]).filter(x => x != null); return v.length ? (v.reduce((a, b) => a + b, 0) / v.length).toFixed(1) : null; };
+    const bestAvg = (() => { const v = names.map(avg).filter(x => x != null); return v.length > 1 ? Math.max(...v.map(Number)).toFixed(1) : null; })();
+    const shown = rows.filter(r => !r.dots || names.some(nm => d[nm][r.id] != null));
+    const anyRated = shown.some(r => r.dots);
+    el.innerHTML = `<div class="scroll"><table><thead><tr><th></th>${names.map(nm =>
+        `<th class="${nm === cur ? 'cur' : ''}"><span>${esc(nm)}</span><button aria-label="Remove ${esc(nm)}" data-rm="${encodeURIComponent(nm)}">✕</button></th>`).join('')}</tr></thead><tbody>` +
+      (anyRated ? `<tr class="overall"><th>Listening average</th>${names.map(nm => { const a = avg(nm); return `<td class="num ${a != null && a === bestAvg ? 'best' : ''}">${a ?? '—'}</td>`; }).join('')}</tr>` : '') +
+      shown.map(r => { const b = bestOf(r); return `<tr><th>${r.title}</th>${names.map(nm => { const v = d[nm][r.id];
+        return `<td class="num ${v != null && v === b ? 'best' : ''}">${v != null ? r.fmt(v) : '—'}</td>`; }).join('')}</tr>`; }).join('') +
+      `</tbody></table></div>`;
+    el.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => this.remove(decodeURIComponent(b.dataset.rm))));
+  },
+};
+
+/* ------------------------------------------------------------------ */
+/* Result: the five numbers read against fixed anchors — physics and    */
+/* psychoacoustics — so the first pair anyone measures gets a verdict.  */
+/* ------------------------------------------------------------------ */
+
+const FIELDS = ['bass', 'treble', 'bassLevel', 'trebleLevel', 'harsh'];
+
+function describe(r) {
+  const bassQ = r.bassLevel <= -6 ? 'bass-forward' : r.bassLevel < -2 ? 'warm' : r.bassLevel <= 2 ? 'neutral' : r.bassLevel <= 6 ? 'lean' : 'bass-light';
+  const trebQ = r.trebleLevel <= -6 ? 'bright' : r.trebleLevel < -2 ? 'forward' : r.trebleLevel <= 2 ? 'neutral' : r.trebleLevel <= 6 ? 'soft' : 'dark';
+  const ext = r.bass <= 25 ? 'full sub-bass' : r.bass <= 35 ? 'deep bass' : r.bass <= 50 ? 'moderate extension' : 'limited low end';
+  const air = r.treble >= 16000 ? 'airy top' : r.treble >= 14000 ? 'extended treble' : r.treble >= 12000 ? 'moderate treble reach' : 'rolled-off treble';
+  const type = {
+    'bass-forward bright': 'V-shaped — fun, not flat', 'bass-forward forward': 'Big bass with bite', 'bass-forward neutral': 'Bass-forward consumer tuning',
+    'bass-forward soft': 'Thick and cosy', 'bass-forward dark': 'Bassy and dark',
+    'warm bright': 'Warm bottom, sharp top', 'warm forward': 'Warm with presence', 'warm neutral': 'Warm and balanced — classic open-back character',
+    'warm soft': 'Smooth and relaxed', 'warm dark': 'Lush and dark',
+    'neutral bright': 'Neutral with a bright edge', 'neutral forward': 'Neutral, slightly forward', 'neutral neutral': 'Reference-neutral monitor',
+    'neutral soft': 'Neutral and easy-going', 'neutral dark': 'Neutral bass, veiled top',
+    'lean bright': 'Bright analytical monitor', 'lean forward': 'Lean and detailed', 'lean neutral': 'Lean, mid-focused',
+    'lean soft': 'Polite and mid-centric', 'lean dark': 'Thin and dark',
+    'bass-light bright': 'Tizzy and thin', 'bass-light forward': 'Light and forward', 'bass-light neutral': 'Bass-light, mids first',
+    'bass-light soft': 'Gentle and small', 'bass-light dark': 'Muffled',
+  }[`${bassQ} ${trebQ}`];
+  const harshBand = r.harsh == null ? null : r.harsh < 3500 ? 'the presence band — shout, not sibilance' : r.harsh < 7000 ? 'the sibilance band — “s” sounds may spit at volume' : 'upper treble — a tizzy, splashy edge';
+  const lines = [
+    ['bass', `${ext}: ${nearestRef(BASS_REFS, r.bass).replace(/^≈ [^:]+: /, '')}`],
+    ['treble', `${air}: ${nearestRef(TREBLE_REFS, r.treble).replace(/^≈ [^:]+: /, '')}`],
+    ['bassLevel', r.bassLevel < 0 ? `${bassQ} — 100 Hz had to come down ${Math.abs(r.bassLevel)} dB to match 1 kHz` : r.bassLevel > 0 ? `${bassQ} — 100 Hz needed +${r.bassLevel} dB to keep up with 1 kHz` : 'neutral — 100 Hz sits level with 1 kHz'],
+    ['trebleLevel', r.trebleLevel < 0 ? `${trebQ} — 8 kHz had to come down ${Math.abs(r.trebleLevel)} dB` : r.trebleLevel > 0 ? `${trebQ} — 8 kHz needed +${r.trebleLevel} dB` : 'neutral — 8 kHz sits level with 1 kHz'],
+  ];
+  if (harshBand) lines.push(['harsh', `sharpest in ${harshBand}`]);
+  return { type, lines };
+}
+
+const verdict = {
+  el: document.getElementById('verdict'),
+  render() {
+    const d = board.load(), name = board.name(), r = d[name];
+    const complete = r && FIELDS.slice(0, 4).every(f => r[f] != null);
+    this.el.hidden = !complete;
+    if (!complete) return;
+    const { type, lines } = describe(r);
+    document.getElementById('vName').textContent = name;
+    document.getElementById('vType').textContent = type;
+    document.getElementById('vLines').innerHTML = lines.map(([f, txt]) => `<li><b>${EXPLORE.find(m => m.id === f).fmt(r[f])}</b><span>${txt}</span></li>`).join('');
+    this.current = { name, r, type, lines };
+  },
+  link(all) {
+    const d = board.load(), names = all ? Object.keys(d) : [board.name()];
+    const enc = names.filter(nm => d[nm]).map(nm => `${encodeURIComponent(nm)}=${FIELDS.map(f => d[nm][f] ?? '').join(',')}`).join(';');
+    return `${location.origin}${location.pathname}#b=${enc}`;
+  },
+  // Results arriving in the URL: merge them onto the board, then clear the hash.
+  importHash() {
+    const m = /[#&]b=([^&]+)/.exec(location.hash); if (!m) return;
+    const d = board.load(), added = [];
+    for (const part of m[1].split(';')) {
+      const [n, v] = part.split('='); if (!n || !v) continue;
+      const name = decodeURIComponent(n), vals = v.split(',');
+      d[name] = d[name] || {}; FIELDS.forEach((f, i) => { if (vals[i] !== '' && vals[i] != null && isFinite(+vals[i])) d[name][f] = +vals[i]; });
+      added.push(name);
+    }
+    if (!added.length) return;
+    board.store(d); history.replaceState(null, '', location.pathname);
+    const el = document.getElementById('shared'); el.hidden = false;
+    el.innerHTML = `Shared with you: <b>${added.map(a => a.replace(/</g, '&lt;')).join('</b>, <b>')}</b>. Name your own pair above and measure it — the board lines them up.`;
+  },
+  // A 1080×1350 card drawn on canvas, shared as a file where possible.
+  async image() {
+    const { name, r, type, lines } = this.current;
+    await document.fonts.ready;
+    const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.fillStyle = '#efeae1'; x.fillRect(0, 0, W, H);
+    const g = x.createLinearGradient(0, 0, 0, 260); g.addColorStop(0, '#5b4030'); g.addColorStop(1, '#4a3427');
+    x.fillStyle = g; x.fillRect(0, 0, W, 260);
+    x.fillStyle = '#c9b9a4'; x.font = '500 22px Inter, sans-serif'; x.letterSpacing = '6px'; x.fillText('SOUNDCHECK  ·  HEADPHONE RESULT', 72, 86);
+    x.letterSpacing = '0px'; x.fillStyle = '#f6efe4'; x.font = '300 66px Fraunces, Georgia, serif';
+    let nm = name; while (x.measureText(nm).width > W - 144 && nm.length > 4) nm = nm.slice(0, -2); if (nm !== name) nm += '…';
+    x.fillText(nm, 72, 175);
+    x.fillStyle = '#c9a46b'; x.font = 'italic 400 34px Fraunces, Georgia, serif'; x.fillText(type, 72, 228);
+    const titles = { bass: 'Bass extension', treble: 'Treble extension', bassLevel: 'Bass vs 1 kHz', trebleLevel: 'Treble vs 1 kHz', harsh: 'Harshness peak' };
+    let y = 360;
+    for (const [f, txt] of lines) {
+      x.strokeStyle = 'rgba(60,45,30,.14)'; x.lineWidth = 1; x.beginPath(); x.moveTo(72, y - 58); x.lineTo(W - 72, y - 58); x.stroke();
+      x.fillStyle = '#6f665b'; x.font = '500 22px Inter, sans-serif'; x.letterSpacing = '3px'; x.fillText(titles[f].toUpperCase(), 72, y - 14);
+      x.letterSpacing = '0px'; x.fillStyle = '#221e1a'; x.font = '500 54px "IBM Plex Mono", Menlo, monospace'; x.textAlign = 'right';
+      x.fillText(EXPLORE.find(m => m.id === f).fmt(r[f]), W - 72, y + 2); x.textAlign = 'left';
+      x.fillStyle = '#6f665b'; x.font = 'italic 400 25px Fraunces, Georgia, serif';
+      const words = txt.split(' '); let line = '', ly = y + 40;
+      for (const w of words) { const t = line ? line + ' ' + w : w; if (x.measureText(t).width > 640) { x.fillText(line, 72, ly); line = w; ly += 32; } else line = t; }
+      x.fillText(line, 72, ly);
+      y += 190;
+    }
+    x.strokeStyle = 'rgba(60,45,30,.14)'; x.beginPath(); x.moveTo(72, y - 58); x.lineTo(W - 72, y - 58); x.stroke();
+    x.fillStyle = '#9b928a'; x.font = 'italic 400 24px Fraunces, Georgia, serif';
+    x.fillText('Measured by ear, not by microphone. Same listener, same volume, different headphones.', 72, H - 96);
+    x.fillStyle = '#a8834f'; x.font = '500 22px Inter, sans-serif'; x.letterSpacing = '4px'; x.fillText('SOUNDCHECK  ·  MEASURE YOUR OWN', 72, H - 52);
+    const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+    const file = new File([blob], `soundcheck-${name.replace(/[^\w-]+/g, '-').toLowerCase()}.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: `Soundcheck — ${name}`, text: `${name}: ${type}. ${this.link(false)}` }); return; } catch (_) { /* cancelled — fall through to download */ }
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  },
+};
+document.getElementById('vShare').addEventListener('click', () => verdict.image());
+document.getElementById('vLink').addEventListener('click', async e => {
+  const url = verdict.link(true);
+  try { await navigator.clipboard.writeText(url); e.target.textContent = 'Link copied'; } catch (_) { prompt('Copy this link', url); }
+  setTimeout(() => e.target.textContent = 'Copy link', 1800);
+});
+document.getElementById('vNext').addEventListener('click', () => {
+  const el = document.getElementById('setupName'); el.value = ''; el.dispatchEvent(new Event('input'));
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus();
+});
+
+/* ------------------------------------------------------------------ */
+/* UI                                                                   */
+/* ------------------------------------------------------------------ */
+
+const volEl = document.getElementById('vol'), volOut = document.getElementById('volOut');
+const bar = document.getElementById('bar'), barTitle = document.getElementById('barTitle'), barReadout = document.getElementById('barReadout');
+
+const showLevel = () => { const g = volumeToGain(volEl.value); volOut.value = g > 0 ? `${(20 * Math.log10(g)).toFixed(0).replace('-', '−')} dBFS` : '−∞ dBFS'; };
+showLevel();
+volEl.addEventListener('input', () => {
+  showLevel();
+  if (player.master) player.master.gain.setTargetAtTime(volumeToGain(volEl.value), player.ctx.currentTime, 0.02);
+});
+document.getElementById('barStop').addEventListener('click', () => player.stop());
+document.addEventListener('keydown', e => {
+  const a = player.active; if (!a || !a.test.nudge) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); a.test.nudge(e.key === 'ArrowRight' ? 1 : -1, e.shiftKey); }
+  else if (e.key === 'Escape') player.stop();
+});
+const barHold = document.getElementById('barHold');
+barHold.addEventListener('click', () => {
+  const a = player.active; if (!a || !a.hold) return;
+  if (a.held == null) {                       // first tap: freeze the sweep
+    a.hold();
+    if (a.field) { barHold.textContent = 'Mark'; barHold.classList.add('armed'); }
+    else { barHold.textContent = 'Held'; barHold.disabled = true; }
+  } else if (a.field) {                       // second tap: save it
+    board.save(a.field, a.held);
+    player.stop();
+  }
+});
+
+const DOTS = 5;
+function renderTest(t, root) {
+  const card = document.createElement('section');
+  card.className = 'test panel'; card.id = t.id;
+  const rating = t.rate ? `<div class="rate" role="radiogroup" aria-label="Rate ${t.title}">${Array.from({ length: DOTS }, (_, i) =>
+    `<button data-v="${i + 1}" aria-label="${i + 1} of ${DOTS}"></button>`).join('')}<span class="rate-label"></span></div>` : '';
+  card.innerHTML = `<h3>${t.title}<span class="done"></span></h3><p class="what">${t.what}</p>
+    <button class="play" aria-label="Play ${t.title}">▶</button>${t.controls || ''}${t.how ? `<p class="how">${t.how}</p>` : ''}${rating}`;
+  card.querySelector('.play').addEventListener('click', () => player.play(t, card));
+  root.appendChild(card);
+  if (t.mount) t.mount(card);
+  if (t.rate) {
+    const dots = [...card.querySelectorAll('.rate button')], lbl = card.querySelector('.rate-label');
+    const show = v => { dots.forEach((d, i) => d.classList.toggle('on', i < v)); lbl.textContent = v ? RATE_WORDS[v - 1] : ''; };
+    dots.forEach(d => d.addEventListener('click', () => { board.save(t.id, +d.dataset.v); }));
+    t.refresh = () => show(board.load()[board.name()]?.[t.id] || 0);
+  }
+}
+const RATE_WORDS = ['poor', 'weak', 'fair', 'good', 'excellent'];
+const sliderTests = EXPLORE.map(sliderTest);
+for (const t of sliderTests) renderTest(t, document.getElementById('explore'));
+
+for (const g of TESTS) {
+  const root = document.getElementById(g.rate ? 'tests' : 'checks');
+  const h2 = document.createElement('h2'); h2.className = 'sub-h'; h2.textContent = g.group; root.appendChild(h2);
+  for (const t of g.items) { t.rate = g.rate; renderTest(t, root); }
+}
+for (const t of UTILITIES) renderTest(t, document.getElementById('utilities'));
+const nameEl = document.getElementById('setupName');
+try { nameEl.value = localStorage.getItem('soundcheck.name') || ''; } catch (_) {}
+nameEl.addEventListener('input', () => { try { localStorage.setItem('soundcheck.name', nameEl.value); } catch (_) {} board.render(); });
+verdict.importHash();
+board.render();
+</script>
+</body>
+</html>

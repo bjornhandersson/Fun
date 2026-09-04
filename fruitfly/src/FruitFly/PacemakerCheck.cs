@@ -55,7 +55,7 @@ internal static class PacemakerCheck
             measure = 800;
         for (int t = 0; t < warm + measure; t++)
         {
-            cpg.Step(dt); // SetModulation never called ⇒ pure baseline drive (modulation = 0)
+            cpg.Step(dt); // no receptors wired ⇒ pure baseline drive from the pacemaker alone
             if (t >= warm)
             {
                 vigorSum += cpg.LeftActivity + cpg.RightActivity;

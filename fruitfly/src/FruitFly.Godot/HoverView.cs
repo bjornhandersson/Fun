@@ -86,7 +86,8 @@ public partial class HoverView : Node2D
         _head = (_head + 1) % HistLen;
         _readout.Text =
             $"fly {_body.Altitude:0}px   food {_foodAlt:0}px   speed {_body.VerticalVelocity:+0;-0}px/s   "
-            + $"beat vigour {_body.BeatVigor:0.00}   command {_body.Command:0}";
+            + $"beat vigour {_body.BeatVigor:0.00}"; // no "command" readout: there is no command
+        // variable any more — the correction is synaptic current, visible in the sense gauges
         QueueRedraw();
     }
 

@@ -66,16 +66,26 @@ public sealed class HalfCentreOscillator
         // No injected baseline: the command neuron IS the drive. External input starts at 0.
     }
 
-    // MODULATE the beat: extra current onto both wing cells, ON TOP of the endogenous command drive.
-    // 0 = the pure baseline beat (Play 7 isolation leaves it here). A reflex (Plan 0008/0009) sets
-    // this each tick from real receptors: positive ⇒ beat HARDER (more vigour ⇒ more lift), negative
-    // ⇒ ease off. This is a sensory-CAUSED correction — honest external input — and the uncaused
-    // baseline it used to ride on is gone.
-    public void SetModulation(double current)
+    // Wire a RECEPTOR into the beat: it joins this same network and synapses onto BOTH wing
+    // cells with the given weight (+ = its spikes push the beat harder, − = its spikes ease it
+    // off). This replaced the old SetModulation(current) hook: nothing may inject current into
+    // the wing cells any more — the only way to influence the beat is a spike through a synapse.
+    public void AddReceptor(LifNeuron receptor, double weight)
     {
-        _net.SetInput(_l, current);
-        _net.SetInput(_r, current);
+        _net.Add(receptor);
+        _net.Connect(receptor, _l, weight);
+        _net.Connect(receptor, _r, weight);
     }
+
+    // TRANSDUCTION — the one honest world→brain doorway. The body sets the current a receptor's
+    // membrane feels (light, odour, motion... becoming charge is what a sense organ IS). Past the
+    // receptor, only spikes through synapses move.
+    public void SetReceptorInput(LifNeuron receptor, double current) =>
+        _net.SetInput(receptor, current);
+
+    // Did this receptor spike on the last tick? For viewers' gauges only — the brain itself
+    // never reads this; its spikes act through their synapses above.
+    public bool ReceptorFired(LifNeuron receptor) => _net.Fired(receptor);
 
     // Advance the circuit by one tick of dtMs and fold the new spikes into the activity outputs.
     public void Step(double dtMs)

@@ -14,6 +14,15 @@ config/name="FruitFly"
 run/main_scene="res://PlayMenu.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 
+[display]
+
+window/size/viewport_width=1152
+window/size/viewport_height=648
+window/size/window_width_override=1728
+window/size/window_height_override=972
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
 [dotnet]
 
 project/assembly_name="FruitFly.Godot"

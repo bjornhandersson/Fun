@@ -62,13 +62,64 @@ explored interactively in a Godot viewer:
     *                  |     SPIKE       *                  |     SPIKE
 ```
 
-## Run it
+## Run it (from a fresh clone)
 
-Requires the .NET SDK.
+### What you need
+
+- **.NET SDK 10** — `dotnet --version` should print `10.x`. Get it from
+  <https://dotnet.microsoft.com/download>.
+- **Godot 4.7 with .NET support** (the "*.NET*" / mono build, not the standard one) — only
+  needed for the visual gallery. Get it from <https://godotengine.org/download>. On macOS the
+  app is assumed to live at `/Applications/Godot_mono.app`; adjust the path below if yours
+  differs.
+
+All commands are run from the repo root.
+
+### 1. Clone and build
+
+```
+git clone <this repo> fruitfly
+cd fruitfly
+dotnet build src/FruitFly.slnx
+```
+
+This builds every project — the Godot-free brain (`FruitFly.Core`), the creatures
+(`FruitFly.Living`), the console viewer (`FruitFly`) and the Godot viewer (`FruitFly.Godot`).
+The Godot build output lands under `src/FruitFly.Godot/.godot/`, which is exactly where
+Godot loads it from, so the app can be started straight from the command line.
+
+### 2. Headless checks (console, no graphics)
 
 ```
 dotnet run --project src/FruitFly
 ```
+
+Runs every circuit built so far and prints a PASS/FAIL line per check (pacemaker, CPG,
+the 2D fly, the 3D fly), plus live ASCII traces of the neurons' voltages (`'*'` = voltage,
+`'|'` = firing threshold). One check, the 3D fly *eating*, is a documented FAIL for now:
+it nails the banana's height but orbits just outside the eat radius.
+
+### 3. The Godot gallery (watch the fly)
+
+macOS, launched directly (Godot is usually not on `PATH`):
+
+```
+/Applications/Godot_mono.app/Contents/MacOS/Godot --path src/FruitFly.Godot &
+```
+
+Linux / Windows: run the Godot .NET executable with the same `--path src/FruitFly.Godot`
+argument. A menu opens with one *play* per circuit — single neuron, chain, summation,
+inhibition, loop, memory, the Braitenberg fruit fly, the wingbeat CPG, the hover, and the
+united fly in 3D.
+
+To open the project in the Godot **editor** instead, add `-e`:
+
+```
+/Applications/Godot_mono.app/Contents/MacOS/Godot -e --path src/FruitFly.Godot &
+```
+
+If Godot complains that it cannot find the game assembly, rerun step 1 (or press *Build* in
+the editor) — the compiled output is not committed to git.
 
 ## Where things live
 

@@ -1,8 +1,10 @@
 # Plan 0010 — Neuralize the flight command (kill the magic baseline)
 
-**Status:** Done (steps 1–3). The uncaused flight baseline is gone — the beat is driven by a real
-pacemaker command neuron. Behaviour matches the old suite (hover ~209px, alt-seek up+down, CPG
-oscillates); only the pre-existing 3D orbit RED remains, untouched. Docs step (4) pending.
+**Status:** Done. The uncaused flight baseline is gone — the beat is driven by a real pacemaker
+command neuron. This plan **survives** the removal of Plays 8 and 9 (ADR 0006): the pacemaker and its
+synapses live in `HalfCentreOscillator` and are what Play 7 runs. The `PacemakerCheck` assertion that
+tied baseline vigour to `LiftGain`'s calibration (0.204) was dropped with `FlyingBody`; the remaining
+check proves only what is true on its own — the cell fires with zero input.
 
 ## Why
 

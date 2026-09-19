@@ -68,16 +68,16 @@ visualises the circuits built so far: single neuron, two-neuron chain, summation
 a self-sustaining loop, a memory neuron in isolation, the assembled Braitenberg **fruit fly**
 (Play 6) — it seeks a banana by smell, avoids walls by **touch**, and latches a memory of being
 stuck to break free — a **wingbeat CPG** (Play 7): two neurons that generate their own rhythm
-(mutual inhibition + fatigue); and a **hover** (Play 8, 2.5D): a body with mass + gravity whose
-wingbeat makes lift, held aloft by a neural reflex (sense dropping → beat harder) — shove it and it
-recovers; and the **united fly in 3D** (Play 9, Plan 0009): the Play-6 horizontal brain composed with
-the wingbeat altitude layer into ONE creature that flies through 3D space — it nails the banana's
-height every trial, though reliable *eating* still waits on a horizontal-orbit fix (documented RED in
-`Fly3DHeadlessCheck`). The last few are the first steps toward neural flight. All behaviour **emerges
-from wiring** — no view lets the engine make a decision. (The 3D wings are a faithful *readout* of the
-real neural wingbeat, not an aerodynamic sim; lift is vigour×gain, not wing forces — see Plan 0009.)
-(Earlier redundant fly demos — a memoryless fly and a two-flies population view — were removed once 6
-superseded them.)
+(mutual inhibition + fatigue), driven by a self-firing pacemaker command neuron (Plan 0010). All
+behaviour **emerges from wiring** — no view lets the engine make a decision.
+
+Two later plays were **removed for fidelity** (ADR 0006, September 2026): a hover (Play 8) and a
+united 3D fly (Play 9). The vertical layer was handed the banana's height directly and smelled a
+private odour field that did not exist in the world, its constants were tuned to the wanted outcome,
+and the 3D fly was two disjoint networks glued in code and drawn as one. Flight restarts from Play 7
+the honest way: one 3D odour field in the world, and ONE network in which the CPG's wing cells are the
+motors that smell and touch modulate. (Earlier redundant fly demos — a memoryless fly and a two-flies
+population view — were removed once 6 superseded them.)
 See [`doc/ai/plans/0001-milestone-0-lif-neuron.md`](doc/ai/plans/0001-milestone-0-lif-neuron.md).
 
 ## How to run things

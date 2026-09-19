@@ -13,9 +13,10 @@ else. No line says "if hungry, go to the banana"; the fly seeks the banana becau
 smell sensors are cross-wired to two motors.
 
 So far it smells its way to food, feels walls and turns away, latches a memory of being
-stuck to break free, beats its wings on a rhythm from two mutually inhibiting neurons, and
-hovers in 3D on a reflex against gravity. Runs live in a Godot viewer with the world on one
-side and the neurons spiking on the other. C#.
+stuck to break free, and beats its wings on a rhythm from two mutually inhibiting neurons.
+A hover and a 3D flight were built, found to cheat, and deleted; the rule that behaviour
+must be caused through neurons outranks a good demo. Runs live in a Godot viewer with the
+world on one side and the neurons spiking on the other. C#.
 
 ### [soundcheck](soundcheck/) — compare headphones with your own ears
 

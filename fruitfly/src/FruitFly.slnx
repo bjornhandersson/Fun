@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="FruitFly.Core/FruitFly.Core.csproj" />
   <Project Path="FruitFly.Godot/FruitFly.Godot.csproj" />
+  <Project Path="FruitFly.Living/FruitFly.Living.csproj" />
   <Project Path="FruitFly/FruitFly.csproj" />
 </Solution>

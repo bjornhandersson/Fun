@@ -12,7 +12,7 @@ namespace FruitFly.Living;
 // ONE class — neither re-wires the circuit, so there is a single source of truth.
 //
 // Output: LeftActivity / RightActivity — each neuron's spikes smoothed into a 0..1 signal, the
-// same way the Fly turns motor spikes into muscle activation. When this drives real wings (rung 2),
+// same way the Fly turns motor spikes into muscle activation. When this one day drives real wings,
 // those two signals ARE the left/right wingbeat amplitude.
 public sealed class HalfCentreOscillator
 {
@@ -28,8 +28,8 @@ public sealed class HalfCentreOscillator
     // synapses, so the drive lives in the graph as a firing CAUSE you can gate or fatigue — not as a
     // number the world pushes into the effectors.
     private const double CommandRestMv = -40.0; // 10 mV above threshold ⇒ self-firing pacemaker
-    private const double CommandWeight = 52.0; // command→wing synapse; sized so baseline vigour ≈ 0.204 (the
-    // value LiftGain was built around) — the honest "wings sized to the body", as synapse strength
+    private const double CommandWeight = 52.0; // command→wing synapse: strong enough that the pacemaker's
+    // ~90 Hz train keeps both wing cells above rheobase, so the half-centre has something to alternate
 
     private readonly Network _net = new();
     private readonly LifNeuron _command = new() { VRest = CommandRestMv };

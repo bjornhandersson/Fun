@@ -26,6 +26,8 @@ new ADR that supersedes it.
 | [0002](0002-bottom-up-spiking-neurons.md) | Accepted | Bottom-up spiking neurons (emergent), not a top-down state machine |
 | [0003](0003-leaky-integrate-and-fire.md) | Accepted | Use the Leaky Integrate-and-Fire (LIF) neuron model |
 | [0004](0004-godot-for-visualization.md) | Accepted | Use Godot (C#) for visualization, brought forward now; brain stays in a Godot-free `FruitFly.Core` library |
+| [0005](0005-creatures-in-fruitfly-living.md) | Accepted | Assembled creatures live in a Godot-free `FruitFly.Living` library; Godot is strictly a viewer |
+| [0006](0006-remove-unfaithful-flight-plays.md) | Accepted | Remove the hover and 3D-fly plays (8, 9): they broke the fidelity principle. Flight restarts from the CPG as one network in one world |
 
 ### Backlog (decisions made, ADR not yet written)
 

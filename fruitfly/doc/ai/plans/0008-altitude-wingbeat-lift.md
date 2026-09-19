@@ -1,6 +1,13 @@
 # Plan 0008 — Altitude: the wingbeat holds the fly up (2.5D)
 
-**Status:** Not started — the start of [[0006]] rungs 2+3 (which merged: see [[0007]], the beat has no
+**Status: REMOVED (September 2026, [ADR 0006](../../adr/0006-remove-unfaithful-flight-plays.md)).**
+Built and then deleted. `FlyingBody` was handed the food's height by the caller and climbed a private
+1D odour field that did not exist in the `World`; the sensor span and smell weight were tuned until the
+body "followed the food down as well as up". That is behaviour produced by wanted-outcome constants,
+not by wiring in a real world. The hover reflex arc itself was honest wiring, but its equilibrium was
+designed into `LiftGain`. Kept as a record. The original plan text follows unchanged.
+
+**Status (original):** Not started — the start of [[0006]] rungs 2+3 (which merged: see [[0007]], the beat has no
 honest job until there's gravity). Scope chosen with the user: **add ONE vertical axis** (gravity +
 lift), keep horizontal seeking/steering exactly as it is, and **isolate it first** in a side-view
 play before touching the seeking fly — the same isolate-then-integrate path that worked for memory

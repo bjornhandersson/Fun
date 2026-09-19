@@ -6,8 +6,9 @@ project.lock.json
 .DS_Store
 *.pyc
 
-# Visual Studio Code
+# Visual Studio Code (personal settings), except fruitfly's shared F5 config
 .vscode
+!fruitfly/.vscode/
 
 # User-specific files
 *.suo
